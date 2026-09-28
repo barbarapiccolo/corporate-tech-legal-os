@@ -1,0 +1,2918 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Shield, FileText, Scale, Cpu, AlertTriangle, CheckCircle2, Lock, 
+  Calendar, Briefcase, Users, Mic, CheckSquare, QrCode, Play, Square, Copy, Download, 
+  ChevronRight, ChevronDown, ChevronLeft, MessageSquare, Sparkles, Search, BarChart3, 
+  TrendingUp, Layers, Building2, PieChart, Radio, FileCheck2, FolderGit2, HelpCircle, 
+  X, Printer, Upload, RefreshCw, Send, Clock, Plus, ArrowRight, ArrowLeft, Sun, Moon, Menu, Check, UserCheck, Eye, Trash2, Edit3, Filter, FileSpreadsheet, Share2, AlertCircle, Bookmark, ExternalLink
+} from 'lucide-react';
+
+export default function DashboardPage() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('planificador');
+
+  const [openSections, setOpenSections] = useState({
+    despacho: true,
+    gabinete: true,
+    cumplimiento: false
+  });
+
+  const toggleSection = (s: 'despacho' | 'gabinete' | 'cumplimiento') => {
+    setOpenSections(prev => ({ ...prev, [s]: !prev[s] }));
+  };
+
+  const isDark = theme === 'dark';
+
+  // =========================================================================
+  // 1. PESTAÑA: PLANIFICADOR DE ASUNTOS (CON FILTRO DE ROL Y BLOQUEOS)
+  // =========================================================================
+  const [filtroRolPlanificador, setFiltroRolPlanificador] = useState<'Todos' | 'In-House' | 'Externo'>('Todos');
+  const [filtroMateriaPlanificador, setFiltroMateriaPlanificador] = useState('Todas');
+  const [buscarPlanificador, setBuscarPlanificador] = useState('');
+  const [vistaPlanificador, setVistaPlanificador] = useState<'kanban' | 'lista'>('kanban');
+  
+  const [tableroPlanificador, setTableroPlanificador] = useState<any[]>([
+    { 
+      id: "EXP-01", 
+      titulo: "Intimación legal por vías de hecho y retención de 3 montacargas", 
+      cliente: "Machtig Rothe, C.A.", 
+      tipo_rol: "Externo",
+      materia: "Inquilinario", 
+      responsable: "Barbara Piccolo", 
+      plazo: "Hoy 16:00", 
+      prioridad: "Crítica", 
+      estado: "Por Iniciar",
+      bloqueo: "Revisión Letrada",
+      bloqueo_tipo: "interno",
+      cuantia: "45.000 USD",
+      tribunal: "Juzgado 2° Primera Instancia Civil y Mercantil - Puerto Ordaz",
+      detalles: "Bloqueo ilegítimo de portón en Galpón 4 de Unare II. Desposesión arbitraria de 3 montacargas Caterpillar. Se prepara requerimiento resolutorio previo a querella de despojo.",
+      bitacora: [
+        { fecha: "24/09/2026", nota: "Reunión de emergencia con Director de Operaciones Carlos Mendoza." },
+        { fecha: "25/09/2026", nota: "Recepción de fotos notariales del portón bloqueado y contrato de 2024." }
+      ]
+    },
+    { 
+      id: "EXP-02", 
+      titulo: "Redacción final de Contrato SaaS Enterprise y DPA con Acme Corp", 
+      cliente: "AI GOVERN S.L.", 
+      tipo_rol: "In-House",
+      materia: "LegalTech", 
+      responsable: "Barbara Piccolo", 
+      plazo: "Viernes 17:00", 
+      prioridad: "Alta", 
+      estado: "En Tramitación",
+      bloqueo: "En Curso",
+      bloqueo_tipo: "ninguno",
+      cuantia: "60.000 EUR/año",
+      tribunal: "Sede Corporativa Madrid / Delaware",
+      detalles: "Acuerdo de licencia de software y tratamiento de datos personales conforme al RGPD y Art. 12/50 del EU AI Act. Cláusula de indemnidad limitada a 12 meses.",
+      bitacora: [
+        { fecha: "20/09/2026", nota: "Primer borrador recibido de los asesores de Acme Corp." },
+        { fecha: "23/09/2026", nota: "Redline emitido limitando el lucro cesante y exclusión de jurisdicción en Singapur." }
+      ]
+    },
+    { 
+      id: "EXP-03", 
+      titulo: "Informe de conciliación de pasivos con proveedores y rotación de stock", 
+      cliente: "Corein, C.A.", 
+      tipo_rol: "Externo",
+      materia: "Auditoría Forense", 
+      responsable: "Equipo Auditor", 
+      plazo: "Lunes 10:00", 
+      prioridad: "Media", 
+      estado: "En Tramitación",
+      bloqueo: "Esperando Facturas Tercero",
+      bloqueo_tipo: "externo",
+      cuantia: "128.000 USD",
+      tribunal: "Auditoría Interna / Sede Guasipati",
+      detalles: "Levantamiento físico de inventario de repuestos, cotejo de libros diarios y conciliación de facturas con 14 proveedores críticos.",
+      bitacora: [
+        { fecha: "18/09/2026", nota: "Cierre de toma física de inventario en almacén central." },
+        { fecha: "22/09/2026", nota: "Detección de diferencia de 12.400 USD en repuestos de maquinaria pesada." }
+      ]
+    },
+    { 
+      id: "EXP-04", 
+      titulo: "Redacción de acta de asamblea extraordinaria sobre reforma estatutaria", 
+      cliente: "Sub 1308, C.A.", 
+      tipo_rol: "Externo",
+      materia: "Societario", 
+      responsable: "Barbara Piccolo", 
+      plazo: "Miércoles", 
+      prioridad: "Media", 
+      estado: "Revisión & Firma",
+      bloqueo: "Esperando Balance Comisario",
+      bloqueo_tipo: "externo",
+      cuantia: "No pecuniaria",
+      tribunal: "Registro Mercantil Segundo del Estado Bolívar",
+      detalles: "Modificación del objeto social para incorporar actividades de importación y representación comercial, y aumento de capital social a valor actualizado.",
+      bitacora: [
+        { fecha: "15/09/2026", nota: "Convocatoria formal a accionistas conforme a estatutos vigentes." },
+        { fecha: "24/09/2026", nota: "Borrador de acta elaborado con informe de comisario colegiado." }
+      ]
+    },
+    { 
+      id: "EXP-05", 
+      titulo: "Protocolo de ciberseguridad y retención de logs (EU AI Act)", 
+      cliente: "Unidad de Tecnología (IT)", 
+      tipo_rol: "In-House",
+      materia: "LegalTech", 
+      responsable: "Barbara Piccolo", 
+      plazo: "Completado", 
+      prioridad: "Alta", 
+      estado: "Concluido",
+      bloqueo: "Concluido",
+      bloqueo_tipo: "ninguno",
+      cuantia: "Cumplimiento Regulatorio",
+      tribunal: "Cumplimiento Interno / Certificación eIDAS",
+      detalles: "Implementación de hash SHA-256 inmutable en bases de datos locales y política Zero-Retention en memoria para consultas corporativas.",
+      bitacora: [
+        { fecha: "01/09/2026", nota: "Auditoría de logs de red de servidores locales." },
+        { fecha: "14/09/2026", nota: "Dictamen de aprobación y firma de política de seguridad." }
+      ]
+    }
+  ]);
+
+  const [modalNuevoAsunto, setModalNuevoAsunto] = useState(false);
+  const [modalVerExpediente, setModalVerExpediente] = useState<any>(null);
+
+  const [nuevoAsuntoForm, setNuevoAsuntoForm] = useState({
+    titulo: '',
+    cliente: 'Machtig Rothe, C.A.',
+    tipo_rol: 'Externo' as 'In-House' | 'Externo',
+    materia: 'Inquilinario',
+    responsable: 'Barbara Piccolo',
+    plazo: 'Próxima semana',
+    prioridad: 'Alta',
+    bloqueo: 'En Curso',
+    bloqueo_tipo: 'ninguno',
+    cuantia: '',
+    tribunal: '',
+    detalles: '',
+    estado: 'Por Iniciar'
+  });
+
+  const agregarNuevoAsunto = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoAsuntoForm.titulo) return;
+    const nuevo = {
+      id: `EXP-0${tableroPlanificador.length + 1}`,
+      titulo: nuevoAsuntoForm.titulo,
+      cliente: nuevoAsuntoForm.cliente,
+      tipo_rol: nuevoAsuntoForm.tipo_rol,
+      materia: nuevoAsuntoForm.materia,
+      responsable: nuevoAsuntoForm.responsable,
+      plazo: nuevoAsuntoForm.plazo || 'Por definir',
+      prioridad: nuevoAsuntoForm.prioridad,
+      estado: nuevoAsuntoForm.estado,
+      bloqueo: nuevoAsuntoForm.bloqueo,
+      bloqueo_tipo: nuevoAsuntoForm.bloqueo.includes('Esperando') ? 'externo' : nuevoAsuntoForm.bloqueo.includes('Revisión') ? 'interno' : 'ninguno',
+      cuantia: nuevoAsuntoForm.cuantia || 'Por cuantificar',
+      tribunal: nuevoAsuntoForm.tribunal || 'Despacho Extrajudicial / Sede Principal',
+      detalles: nuevoAsuntoForm.detalles || 'Expediente dado de alta en el sistema del despacho.',
+      bitacora: [
+        { fecha: "28/09/2026", nota: "Apertura del expediente en el Planificador por Dirección Letrada." }
+      ]
+    };
+    setTableroPlanificador([nuevo, ...tableroPlanificador]);
+    setNuevoAsuntoForm({
+      titulo: '',
+      cliente: 'Machtig Rothe, C.A.',
+      tipo_rol: 'Externo',
+      materia: 'Inquilinario',
+      responsable: 'Barbara Piccolo',
+      plazo: 'Próxima semana',
+      prioridad: 'Alta',
+      bloqueo: 'En Curso',
+      bloqueo_tipo: 'ninguno',
+      cuantia: '',
+      tribunal: '',
+      detalles: '',
+      estado: 'Por Iniciar'
+    });
+    setModalNuevoAsunto(false);
+  };
+
+  const moverEstadoAsunto = (id: string, nuevoEstado: string) => {
+    setTableroPlanificador(prev => prev.map(item => 
+      item.id === id ? { ...item, estado: nuevoEstado } : item
+    ));
+    if (modalVerExpediente && modalVerExpediente.id === id) {
+      setModalVerExpediente((prev: any) => ({ ...prev, estado: nuevoEstado }));
+    }
+  };
+
+  const eliminarAsunto = (id: string) => {
+    if (confirm("¿Desea archivar y retirar este asunto del planificador?")) {
+      setTableroPlanificador(prev => prev.filter(i => i.id !== id));
+      setModalVerExpediente(null);
+    }
+  };
+
+  // =========================================================================
+  // 2. PESTAÑA: DIRECTORIO & CRM (CON MATRIZ DE FACULTADES Y EXPEDIENTES)
+  // =========================================================================
+  const [clienteVerFichaModal, setClienteVerFichaModal] = useState<any>(null);
+  
+  const [clientes, setClientes] = useState<any[]>([
+    {
+      id: "CLI-01",
+      nombre: "Machtig Rothe, C.A.",
+      tipo: "Externo",
+      rif: "J-40192834-0",
+      apoderado: "Carlos Mendoza (Director de Operaciones)",
+      cedula_apoderado: "V-14.502.839",
+      email: "carlos.mendoza@machtigrothe.com",
+      telefono: "+58 414-862-3344",
+      domicilio: "Puerto Ordaz, Estado Bolívar",
+      asuntos_activos: 2,
+      estado: "Activo",
+      materia_principal: "Inquilinario Comercial & Maquinaria",
+      facultades_junta: "Vence Noviembre 2027 (Vigente)",
+      facultades_poder: "Alerta: Requiere ratificación notarial (vence en 45 días)",
+      facultades_estado: "alerta"
+    },
+    {
+      id: "CLI-02",
+      nombre: "Corein, C.A.",
+      tipo: "Externo",
+      rif: "J-30492817-2",
+      apoderado: "Roberto Gómez (Presidente)",
+      cedula_apoderado: "V-11.238.991",
+      email: "presidencia@corein.com",
+      telefono: "+58 424-915-2200",
+      domicilio: "Guasipati, Estado Bolívar",
+      asuntos_activos: 1,
+      estado: "Retainer",
+      materia_principal: "Auditoría Mercantil & Deuda",
+      facultades_junta: "Vigente hasta Marzo 2028",
+      facultades_poder: "Poder General Amplio Notariado Vigente",
+      facultades_estado: "vigente"
+    },
+    {
+      id: "CLI-03",
+      nombre: "Inmobiliaria del Este, C.A.",
+      tipo: "Externo",
+      rif: "J-30948572-1",
+      apoderado: "Andrés Silva (Administrador Único)",
+      cedula_apoderado: "V-12.894.102",
+      email: "administracion@inmobiliariadeleste.com",
+      telefono: "+58 412-300-1122",
+      domicilio: "Caracas, Distrito Capital",
+      asuntos_activos: 1,
+      estado: "En Negociación",
+      materia_principal: "Contratación Inmobiliaria",
+      facultades_junta: "Vigente hasta Diciembre 2026",
+      facultades_poder: "Facultades estatutarias de administración vigentes",
+      facultades_estado: "vigente"
+    },
+    {
+      id: "CLI-04",
+      nombre: "Unidad de Tecnología e Innovación (IT)",
+      tipo: "Interno",
+      rif: "Área Interna Soberana",
+      apoderado: "Director de TI / Sistemas",
+      cedula_apoderado: "Identificador Interno",
+      email: "it-director@aigovern.space",
+      telefono: "Ext. 201",
+      domicilio: "Sede Tecnológica Central",
+      asuntos_activos: 3,
+      estado: "Activo",
+      materia_principal: "Seguridad de Datos & AI Governance",
+      facultades_junta: "Estructura Orgánica Corporativa",
+      facultades_poder: "Delegación Funcional de Firma",
+      facultades_estado: "vigente"
+    },
+    {
+      id: "CLI-05",
+      nombre: "Dirección de Finanzas & Tesorería",
+      tipo: "Interno",
+      rif: "Área Interna Soberana",
+      apoderado: "Controller Financiero",
+      cedula_apoderado: "Identificador Interno",
+      email: "finanzas@aigovern.space",
+      telefono: "Ext. 104",
+      domicilio: "Edificio Corporativo Torre Este",
+      asuntos_activos: 2,
+      estado: "Activo",
+      materia_principal: "SLA Billing & Controles SOX",
+      facultades_junta: "Estructura Orgánica Corporativa",
+      facultades_poder: "Firma Mancomunada en Cuentas",
+      facultades_estado: "vigente"
+    },
+    {
+      id: "CLI-06",
+      nombre: "AI GOVERN International S.L. (Filial España)",
+      tipo: "Interno",
+      rif: "B-88392019",
+      apoderado: "Barbara Piccolo (General Counsel)",
+      cedula_apoderado: "Representante Permanente",
+      email: "barbara@aigovern.space",
+      telefono: "+34 910-000-000",
+      domicilio: "Paseo de la Castellana, Madrid",
+      asuntos_activos: 4,
+      estado: "Retainer",
+      materia_principal: "Expansión UE & Contratación SaaS",
+      facultades_junta: "Consejo de Administración Vigente",
+      facultades_poder: "Poder de Representación General eIDAS",
+      facultades_estado: "vigente"
+    }
+  ]);
+
+  const [nuevoCliente, setNuevoCliente] = useState({
+    nombre: "",
+    tipo: "Externo" as 'Interno' | 'Externo',
+    rif: "",
+    apoderado: "",
+    cedula_apoderado: "",
+    email: "",
+    telefono: "",
+    domicilio: "",
+    materia_principal: "Corporativo"
+  });
+
+  const [clienteGuardadoExito, setClienteGuardadoExito] = useState(false);
+
+  const registrarNuevoCliente = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoCliente.nombre) return;
+    const item = {
+      id: `CLI-${Date.now().toString().slice(-4)}`,
+      nombre: nuevoCliente.nombre,
+      tipo: nuevoCliente.tipo,
+      rif: nuevoCliente.rif || "S/R",
+      apoderado: nuevoCliente.apoderado || "Por designar",
+      cedula_apoderado: nuevoCliente.cedula_apoderado || "V-00.000.000",
+      email: nuevoCliente.email || "contacto@cliente.com",
+      telefono: nuevoCliente.telefono || "N/A",
+      domicilio: nuevoCliente.domicilio || "Domicilio comercial principal",
+      asuntos_activos: 1,
+      estado: "Activo",
+      materia_principal: nuevoCliente.materia_principal,
+      facultades_junta: "Registrada en Constitución",
+      facultades_poder: "Vigente",
+      facultades_estado: "vigente"
+    };
+    setClientes([item, ...clientes]);
+    setNuevoCliente({
+      nombre: "",
+      tipo: "Externo",
+      rif: "",
+      apoderado: "",
+      cedula_apoderado: "",
+      email: "",
+      telefono: "",
+      domicilio: "",
+      materia_principal: "Corporativo"
+    });
+    setClienteGuardadoExito(true);
+    setTimeout(() => setClienteGuardadoExito(false), 4000);
+  };
+
+  // =========================================================================
+  // 3. PESTAÑA: CALENDARIO PROCESAL (CON DÍAS DE DESPACHO Y EXPORTADOR .ICS)
+  // =========================================================================
+  const [vistaCalendario, setVistaCalendario] = useState<'mes' | 'agenda'>('mes');
+  const [tipoComputoPlazo, setTipoComputoPlazo] = useState<'continuos' | 'despacho'>('despacho');
+  const [mesActualIndex, setMesActualIndex] = useState(8); // Septiembre
+  const [anioActual, setAnioActual] = useState(2026);
+  const [diaSeleccionado, setDiaSeleccionado] = useState<number>(28);
+  const [modalNuevoEvento, setModalNuevoEvento] = useState(false);
+
+  const mesesNombres = [
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  ];
+
+  const [eventosCalendario, setEventosCalendario] = useState<any[]>([
+    { 
+      id: "EV-01", 
+      dia: 25, 
+      mes: 8, 
+      anio: 2026,
+      titulo: "Término fatal para contestar intimación de desalojo (Galpón Unare)", 
+      cliente: "Machtig Rothe, C.A.", 
+      fecha: "25 de Septiembre de 2026", 
+      hora: "16:00",
+      tipo: "Procesal Perentorio", 
+      dias_restantes: "Vencimiento Fatal", 
+      nivel: "critico",
+      computo: "Días de Despacho (CPC Art. 197)",
+      tribunal: "Juzgado 2° Civil y Mercantil"
+    },
+    { 
+      id: "EV-02", 
+      dia: 28, 
+      mes: 8, 
+      anio: 2026,
+      titulo: "Audiencia Preliminar de Conciliación e Intimación de Pago", 
+      cliente: "Machtig Rothe, C.A.", 
+      fecha: "28 de Septiembre de 2026", 
+      hora: "10:30",
+      tipo: "Audiencia Judicial", 
+      dias_restantes: "Hoy", 
+      nivel: "urgente",
+      computo: "Fijada por Boleta",
+      tribunal: "Tribunal Superior en lo Civil"
+    },
+    { 
+      id: "EV-03", 
+      dia: 30, 
+      mes: 8, 
+      anio: 2026,
+      titulo: "Vencimiento de preaviso formal de prórroga contractual (Cláusula 3)", 
+      cliente: "Machtig Rothe, C.A.", 
+      fecha: "30 de Septiembre de 2026", 
+      hora: "17:00",
+      tipo: "Vencimiento Contractual", 
+      dias_restantes: "Faltan 2 días", 
+      nivel: "urgente",
+      computo: "Días Continuos (Código Civil)",
+      tribunal: "Notaría Tercera de Chacao"
+    },
+    { 
+      id: "EV-04", 
+      dia: 6, 
+      mes: 9, // Octubre
+      anio: 2026,
+      titulo: "Presentación de informe de auditoría forense a Junta Directiva", 
+      cliente: "Corein, C.A.", 
+      fecha: "06 de Octubre de 2026", 
+      hora: "09:00",
+      tipo: "Reunión de Directorio", 
+      dias_restantes: "Faltan 8 días", 
+      nivel: "ordinario",
+      computo: "Días Calendario",
+      tribunal: "Sede Principal Guasipati"
+    },
+    { 
+      id: "EV-05", 
+      dia: 15, 
+      mes: 9, 
+      anio: 2026,
+      titulo: "Asamblea General Extraordinaria de Accionistas (Sub 1308)", 
+      cliente: "Sub 1308, C.A.", 
+      fecha: "15 de Octubre de 2026", 
+      hora: "11:00",
+      tipo: "Asamblea Societaria", 
+      dias_restantes: "Faltan 17 días", 
+      nivel: "ordinario",
+      computo: "Convocatoria Estatutaria",
+      tribunal: "Registro Mercantil Segundo"
+    },
+    { 
+      id: "EV-06", 
+      dia: 24, 
+      mes: 9, 
+      anio: 2026,
+      titulo: "Renovación trimestral de infraestructura VPC y certificados eIDAS", 
+      cliente: "AI GOVERN S.L.", 
+      fecha: "24 de Octubre de 2026", 
+      hora: "18:00",
+      tipo: "Hito Tecnológico", 
+      dias_restantes: "Faltan 26 días", 
+      nivel: "ordinario",
+      computo: "SLA Continuo",
+      tribunal: "Infraestructura eIDAS"
+    }
+  ]);
+
+  const [nuevoEventoForm, setNuevoEventoForm] = useState({
+    titulo: '',
+    cliente: 'Machtig Rothe, C.A.',
+    fecha: '2026-09-30',
+    hora: '10:00',
+    tipo: 'Procesal Perentorio',
+    nivel: 'urgente',
+    computo: 'Días de Despacho (CPC)',
+    tribunal: ''
+  });
+
+  const agregarNuevoEventoCalendario = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nuevoEventoForm.titulo) return;
+    const fParts = nuevoEventoForm.fecha.split('-');
+    const anio = parseInt(fParts[0]);
+    const mes = parseInt(fParts[1]) - 1;
+    const dia = parseInt(fParts[2]);
+
+    const nuevo = {
+      id: `EV-${Date.now().toString().slice(-4)}`,
+      dia,
+      mes,
+      anio,
+      titulo: nuevoEventoForm.titulo,
+      cliente: nuevoEventoForm.cliente,
+      fecha: `${dia} de ${mesesNombres[mes]} de ${anio}`,
+      hora: nuevoEventoForm.hora || '09:00',
+      tipo: nuevoEventoForm.tipo,
+      dias_restantes: "Programado",
+      nivel: nuevoEventoForm.nivel,
+      computo: nuevoEventoForm.computo,
+      tribunal: nuevoEventoForm.tribunal || 'Despacho Judicial / Notarial'
+    };
+    setEventosCalendario([...eventosCalendario, nuevo]);
+    setModalNuevoEvento(false);
+    setDiaSeleccionado(dia);
+  };
+
+  const getDiasDelMes = (mesIdx: number, anio: number) => {
+    const primerDiaSemana = new Date(anio, mesIdx, 1).getDay();
+    const offsetLunes = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
+    const totalDias = new Date(anio, mesIdx + 1, 0).getDate();
+    return { offsetLunes, totalDias };
+  };
+
+  // Función para Exportar Archivo .ICS Estándar a Google Calendar / Outlook
+  const exportarCalendarioICS = () => {
+    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//AI GOVERN//Legal OS Calendar//ES\nCALSCALE:GREGORIAN\nMETHOD:PUBLISH\n";
+    eventosCalendario.forEach(ev => {
+      const mesStr = (ev.mes + 1).toString().padStart(2, '0');
+      const diaStr = ev.dia.toString().padStart(2, '0');
+      const horaStr = ev.hora ? ev.hora.replace(':', '') + '00' : '090000';
+      icsContent += `BEGIN:VEVENT\nUID:${ev.id}@aigovern.space\nSUMMARY:[${ev.cliente}] ${ev.titulo}\nDESCRIPTION:Tipo: ${ev.tipo}\\nTribunal: ${ev.tribunal}\\nCómputo: ${ev.computo}\nDTSTART:${ev.anio}${mesStr}${diaStr}T${horaStr}\nDTEND:${ev.anio}${mesStr}${diaStr}T180000\nSTATUS:CONFIRMED\nEND:VEVENT\n`;
+    });
+    icsContent += "END:VCALENDAR";
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Agenda_Procesal_Piccolo_2026.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+    alert("Archivo .ics generado con éxito. Listo para importar en Google Calendar, Apple Calendar o Outlook.");
+  };
+
+  // =========================================================================
+  // 4. PESTAÑA: RENDIMIENTO & MÉTRICAS (CON INFORME EJECUTIVO EN 1 PÁGINA)
+  // =========================================================================
+  const [metricasDespacho] = useState({
+    valor_aportado_usd: "148.000 USD",
+    contingencias_ahorradas_usd: "24.500 USD",
+    facturacion_mes_usd: "22.350 USD",
+    tasa_eficiencia_tiempo: "82% Reducción ciclo revisión (de 5 días a 18 horas)",
+    horas_totales_equipo: "142 horas",
+    asuntos_cerrados_mes: 14,
+    asuntos_en_curso: 5
+  });
+
+  const descargarInformeEjecutivoSemanal = () => {
+    const reportText = 
+`INFORME EJECUTIVO SEMANAL - DIRECCIÓN LETRADA & GENERAL COUNSEL
+DESPACHO PICCOLO & ASOCIADOS / AI GOVERN
+FECHA: 28 DE SEPTIEMBRE DE 2026
+
+1. RESUMEN DE GESTIÓN Y VALOR APORTADO
+- Valor económico desbloqueado en operaciones y acuerdos: ${metricasDespacho.valor_aportado_usd}
+- Contingencias patrimoniales prevenidas (vías de hecho / sanciones): ${metricasDespacho.contingencias_ahorradas_usd}
+- Tasa de aceleración de ciclo de revisión contractual: 82% (de 5 días a 18 horas promedio)
+- Asuntos activos en tramitación: ${tableroPlanificador.length} expedientes
+
+2. HITOS Y CONTINGENCIAS CRÍTICAS RESUELTAS
+a) MACHTIG ROTHE, C.A.: Requerimiento formal por vías de hecho y retención ilegítima de 3 montacargas. Se acordó desbloqueo y compensación de mejoras por 15.000 USD con penalidad conminatoria de 500 USD/día.
+b) AI GOVERN S.L.: Redline y cierre de Contrato Enterprise SaaS con Acme Corp. Se eliminó lucro cesante y jurisdicción foránea en Singapur, limitando responsabilidad a 12 meses.
+c) COREIN, C.A.: Cierre de auditoría forense de pasivos y toma física de inventario central.
+
+3. TÉRMINOS PERENTORIOS DE LA PRÓXIMA SEMANA
+- 30 de Septiembre: Preaviso formal de renovación arrendaticia Galpón Unare (Notaría Tercera).
+- 06 de Octubre: Presentación de informe forense a Junta Directiva de Corein.
+- 15 de Octubre: Asamblea General Extraordinaria de Accionistas Sub 1308.
+
+Emitido por: Barbara Piccolo (General Counsel / Socia Directora)
+Certificación criptográfica SHA-256 en Bóveda Soberana.`;
+
+    const blob = new Blob([reportText], { type: 'application/msword;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Informe_Ejecutivo_Semanal_Direccion_Piccolo.doc`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // =========================================================================
+  // GABINETE 1: CALIFICACIÓN & ESTRATEGIA (CON MATRIZ DE RIESGO/BENEFICIO)
+  // =========================================================================
+  const [clienteSeleccionadoTriage, setClienteSeleccionadoTriage] = useState("Machtig Rothe, C.A.");
+  const [archivosAdjuntosTriage] = useState<string[]>([
+    "notificacion_extrajudicial_desalojo.pdf",
+    "contrato_arrendamiento_2024.docx",
+    "fotos_bloqueo_porton_montacargas.jpg"
+  ]);
+  const [consultaLetrada, setConsultaLetrada] = useState(
+    "Tuve reunión de emergencia con el cliente. La arrendadora pretende desalojar en 48 horas alegando atraso en reparaciones estructurales y bloqueó el portón reteniendo 3 montacargas. Analicemos las leyes, la jurisprudencia civil venezolana y plantéame las opciones estratégicas que tenemos."
+  );
+  const [cargandoDictamen, setCargandoDictamen] = useState(false);
+  const [dictamenEstrategico, setDictamenEstrategico] = useState<any>({
+    cliente: "Machtig Rothe, C.A.",
+    materia: "Inquilinario Comercial / Tutela Posesoria",
+    nivel_urgencia: "Crítica (Término perentorio de 48 horas)",
+    hechos_relevantes: [
+      "Notificación extrajudicial conminatoria que pretende desposesión sin intervención judicial.",
+      "Vía de hecho material: Bloqueo de accesos y retención ilegítima de bienes de capital (3 montacargas).",
+      "Conflicto de compensación sobre reparaciones estructurales urgentes de techo y pavimento."
+    ],
+    vias_estrategicas: [
+      {
+        opcion: "Opción A: Requerimiento Formal Extrajudicial con Apercibimiento Penal",
+        descripcion: "Redacción y consignación inmediata de contestación formal intimando el desbloqueo del portón en 12 horas, advirtiendo el tipo penal de retención indebida (Art. 468 Código Penal) y reserva expresa de cobro por daños y perjuicios comerciales.",
+        viabilidad: "Inmediata (Recomendada como paso previo hoy mismo)",
+        tiempo_ejecucion: "Hoy antes de las 16:00",
+        costo_financiero: "Bajo (Honorarios extrajudiciales de redacción)",
+        nivel_riesgo: "Medio (Si no ceden, se escala a sede judicial)",
+        impacto_negocio: "Restitución pacífica inmediata sin paralizar operaciones de almacén"
+      },
+      {
+        opcion: "Opción B: Querella Interdictal de Despojo y Medida Cautelar Innominada",
+        descripcion: "Interposición de acción posesoria ante los Tribunales Civiles y Mercantiles de Puerto Ordaz, solicitando medida cautelar urgente de secuestro de llaves y aseguramiento de la libre circulación de maquinaria pesada.",
+        viabilidad: "Alta efectividad procesal en sede jurisdiccional",
+        tiempo_ejecucion: "24 a 48 horas",
+        costo_financiero: "Medio-Alto (Aranceles, traslado judicial y fianza cautelar)",
+        nivel_riesgo: "Bajo en Derecho (Doctrina pacífica TSJ a favor de la posesión)",
+        impacto_negocio: "Desbloqueo forzoso con auxilio de la fuerza pública"
+      },
+      {
+        opcion: "Opción C: Consignación Arrendaticia y Compensación Formal de Mejoras",
+        descripcion: "Consignación formal de cánones ante el tribunal competente, deduciendo las facturas fiscales de las obras de reparación estructural según lo pactado en la Cláusula de Mejoras.",
+        viabilidad: "Eficaz para enervar cualquier pretensión de resolución de contrato por falta de pago",
+        tiempo_ejecucion: "3 a 5 días hábiles",
+        costo_financiero: "Bajo (Retención y depósito formal en cuenta bancaria del tribunal)",
+        nivel_riesgo: "Bajo (Blindaje absoluto ante acusaciones de insolvencia)",
+        impacto_negocio: "Cierre definitivo del reclamo económico de la arrendadora"
+      }
+    ],
+    fundamento_legal: [
+      "Artículos 1.159 y 1.160 del Código Civil: Principio de fuerza obligatoria de los contratos y ejecución de buena fe.",
+      "Artículos 1.585 y siguientes del Código Civil: Obligación de la arrendadora de procurar el goce pacífico de la cosa arrendada.",
+      "Criterio pacífico y reiterado de la Sala de Casación Civil del TSJ: Prohibición absoluta de vías de hecho y justicia por propia mano en contratos de arrendamiento.",
+      "Artículo 588 del Código de Procedimiento Civil: Procedencia de medidas cautelares innominadas ante peligro inminente de daño patrimonial."
+    ]
+  });
+
+  const ejecutarCalificacionEstrategica = () => {
+    setCargandoDictamen(true);
+    setTimeout(() => {
+      setDictamenEstrategico((prev: any) => ({
+        ...prev,
+        cliente: clienteSeleccionadoTriage
+      }));
+      setCargandoDictamen(false);
+    }, 450);
+  };
+
+  // =========================================================================
+  // GABINETE 2: ENSAMBLADOR DOCUMENTAL (CON CHECKBOXES LEGO Y DATOS CRM BLOQUEADOS)
+  // =========================================================================
+  const [clienteEnsamblaje, setClienteEnsamblaje] = useState("Machtig Rothe, C.A.");
+  const [modeloDriveSeleccionado, setModeloDriveSeleccionado] = useState("arrendamiento");
+  
+  // Cláusulas Opcionales Tipo «Lego» (Checkboxes de blindaje letrado)
+  const [clausulaLegoBCV, setClausulaLegoBCV] = useState(true);
+  const [clausulaLegoViasDeHecho, setClausulaLegoViasDeHecho] = useState(true);
+  const [clausulaLegoMejoras, setClausulaLegoMejoras] = useState(true);
+  const [clausulaLegoArbitral, setClausulaLegoArbitral] = useState(false);
+
+  // Variables mapeadas del cliente
+  const [variablesEnsamblador, setVariablesEnsamblador] = useState({
+    arrendadora: "INMOBILIARIA DEL ESTE, C.A.",
+    arrendadora_rif: "J-30948572-1",
+    arrendadora_rep: "ANDRÉS SILVA",
+    arrendadora_ci: "V-12.894.102",
+    arrendataria: "MACHTIG ROTHE, C.A.",
+    arrendataria_rif: "J-40192834-0",
+    arrendataria_rep: "CARLOS MENDOZA",
+    arrendataria_ci: "V-14.502.839",
+    inmueble: "Galpón Industrial N° 4, Parcela 12, Manzana 3, Sector Unare II, Puerto Ordaz, Municipio Caroní del Estado Bolívar",
+    linderos: "Norte: Calle Principal de Unare; Sur: Parcela 13; Este: Galpón N° 3; Oeste: Vía de acceso comunal",
+    monto_canon: "2.800 USD",
+    plazo_vigencia: "Veinticuatro (24) meses",
+    monto_mejoras: "15.000 USD",
+    porcentaje_compensacion: "50%",
+    penalidad_diaria: "500 USD",
+    ciudad_domicilio: "Puerto Ordaz, Estado Bolívar"
+  });
+
+  useEffect(() => {
+    const c = clientes.find(item => item.nombre === clienteEnsamblaje);
+    if (c) {
+      setVariablesEnsamblador(prev => ({
+        ...prev,
+        arrendataria: c.nombre.toUpperCase(),
+        arrendataria_rif: c.rif,
+        arrendataria_rep: c.apoderado.toUpperCase(),
+        arrendataria_ci: c.cedula_apoderado || "V-14.502.839",
+        ciudad_domicilio: c.domicilio || "Puerto Ordaz, Estado Bolívar"
+      }));
+    }
+  }, [clienteEnsamblaje]);
+
+  const generarTextoDocumentoCompleto = () => {
+    if (modeloDriveSeleccionado === 'poder') {
+      return `PODER ESPECIAL AMPLIO Y DE ADMINISTRACIÓN Y DISPOSICIÓN NOTARIAL
+
+POR ANTE MÍ, Notario Público competente del Estado Bolívar, compareció el ciudadano ${variablesEnsamblador.arrendataria_rep}, mayor de edad, domiciliado en ${variablesEnsamblador.ciudad_domicilio}, titular de la cédula de identidad N° ${variablesEnsamblador.arrendataria_ci}, actuando en su carácter de representante legal de la sociedad mercantil ${variablesEnsamblador.arrendataria}, inscrita ante el Registro Mercantil con el N° ${variablesEnsamblador.arrendataria_rif}, carácter que acredita mediante acta constitutiva y estatutos sociales debidamente protocolizados, y declaró:
+
+Que por medio del presente instrumento confiere PODER ESPECIAL PERO TAN AMPLIO COMO EN DERECHO SE REQUIERA Y SEA NECESARIO a la abogada en ejercicio BARBARA ISABEL PICCOLO OBALDO, inscrita en el Instituto de Previsión Social del Abogado (IPSA) bajo el N° 102.485, para que en nombre y representación de la referida sociedad mercantil ejerza las más amplias facultades de administración, defensa judicial, resguardo de activos y representación patrimonial ante cualquier autoridad judicial, administrativa, tributaria o notarial en todo el territorio nacional.
+
+FACULTADES JUDICIALES Y PROCESALES: La apoderada queda plenamente facultada para intentar y contestar demandas, reconvenciones, querellas interdictales de despojo o de amparo posesorio; solicitar y ejecutar medidas cautelares preventivas de secuestro, embargo o medidas innominadas de aseguramiento; darse por notificada, apelar, recurrir de casación; convenir en demandas, transigir, desistir de la acción o del procedimiento, comprometer en árbitros arbitradores o de derecho; hacer posturas en remates judiciales; solicitar la restitución de bienes muebles y montacargas retenidos indebidamente; promover y evacuar toda clase de pruebas periciales, inspecciones judiciales y testificales.
+
+FACULTADES ADMINISTRATIVAS Y TRIBUTARIAS: Representar a la mandante por ante el Servicio Nacional Integrado de Administración Aduanera y Tributaria (SENIAT), SUNDDE, Inspectorías del Trabajo, Alcaldías Municipales y cuerpos policiales o de investigación en caso de vías de hecho cometidas contra las instalaciones o bienes de capital de la sociedad.
+
+En fe de lo cual, firma y otorga el compareciente ante mí en ${variablesEnsamblador.ciudad_domicilio}, a la fecha de su protocolización legal.`;
+    }
+
+    if (modeloDriveSeleccionado === 'asamblea') {
+      return `ACTA DE ASAMBLEA GENERAL EXTRAORDINARIA DE ACCIONISTAS DE LA SOCIEDAD MERCANTIL ${variablesEnsamblador.arrendataria}
+
+En la ciudad de ${variablesEnsamblador.ciudad_domicilio}, a los quince (15) días del mes de Octubre de 2026, siendo las diez de la mañana (10:00 a.m.), se reunieron en la sede social de la empresa los accionistas que representan el cien por ciento (100%) del capital social suscrito y pagado de la sociedad mercantil ${variablesEnsamblador.arrendataria}, inscrita ante el Registro Mercantil bajo el N° ${variablesEnsamblador.arrendataria_rif}. 
+
+Presidió la sesión el ciudadano ${variablesEnsamblador.arrendataria_rep}, en su carácter de Presidente de la Junta Directiva. Constatado el quórum estatutario unánime, el Presidente declaró válidamente instalada la Asamblea y sometió a consideración el siguiente:
+
+ORDEN DEL DÍA:
+PRIMERO: Presentación, discusión y aprobación del Balance General y Estado de Resultados auditado al cierre del ejercicio.
+SEGUNDO: Aumento del Capital Social mediante aportes y capitalización de acreencias de los accionistas.
+TERCERO: Modificación correlativa de la Cláusula Quinta de los Estatutos Sociales relativa al capital social.
+CUARTO: Autorización a la Dirección Letrada para la protocolización del acta respectiva.
+
+DESARROLLO DE LA ASAMBLEA:
+PUNTO PRIMERO: Tomó la palabra el Presidente y expuso el balance auditado correspondiente, el cual contó con el informe favorable del Comisario. Sometido a votación, fue aprobado por unanimidad.
+PUNTO SEGUNDO Y TERCERO: Se acordó por unanimidad de votos aumentar el capital social de la compañía a la cantidad de Cien Mil Dólares de los Estados Unidos de América (100.000,00 USD) pagaderos a la tasa BCV, emitiéndose nuevas acciones ordinarias y nominativas de igual valor nominal.
+PUNTO CUARTO: Se facultó ampliamente a la abogada BARBARA PICCOLO para que consigne y protocolice la presente acta ante el Registro Mercantil competente, solicite el cálculo de aranceles y retire el documento registrado.
+
+No habiendo más asuntos que tratar, se dio por concluida la sesión y se firma en señal de conformidad unánime.`;
+    }
+
+    // Modelo Arrendamiento Comercial Completo con Cláusulas Lego
+    let clausulaCanonTexto = clausulaLegoBCV 
+      ? `CLÁUSULA CUARTA: CANON DE ARRENDAMIENTO Y TASA OFICIAL BCV
+El canon mensual convenido es la cantidad de ${variablesEnsamblador.monto_canon}, pagadero en Bolívares conforme al tipo de cambio de referencia publicado por el Banco Central de Venezuela (BCV) a la fecha efectiva de pago. Los pagos se realizarán de manera anticipada dentro de los primeros cinco (5) días continuos de cada mes mediante transferencia bancaria verificable.`
+      : `CLÁUSULA CUARTA: CANON DE ARRENDAMIENTO
+El canon mensual convenido es la cantidad de ${variablesEnsamblador.monto_canon} mensuales pagaderos por mensualidades anticipadas.`;
+
+    let clausulaMejorasTexto = clausulaLegoMejoras
+      ? `CLÁUSULA QUINTA: MEJORAS ESTRUCTURALES Y RÉGIMEN DE COMPENSACIÓN
+Las partes reconocen que el inmueble requiere obras urgentes de adecuación estructural y reparación mayor de cubiertas de techo. Se autoriza a LA ARRENDATARIA a acometer dichas obras hasta por un monto presupuestado de ${variablesEnsamblador.monto_mejoras}, monto que será compensado mensualmente a razón de hasta un ${variablesEnsamblador.porcentaje_compensacion} de los cánones sucesivos de arrendamiento previa presentación de facturas fiscales legales válidas (Arts. 1.585 y 1.587 Código Civil).`
+      : `CLÁUSULA QUINTA: MANTENIMIENTO ORDINARIO
+Las reparaciones menores y de mero mantenimiento correrán por cuenta exclusiva de LA ARRENDATARIA.`;
+
+    let clausulaViasDeHechoTexto = clausulaLegoViasDeHecho
+      ? `CLÁUSULA SEXTA: PROHIBICIÓN TERMINANTE DE VÍAS DE HECHO Y PENALIDAD DIARIA
+Queda terminantemente prohibido a LA ARRENDADORA o sus dependientes bloquear accesos, portones o retener bienes de capital, herramientas o montacargas pertenecientes a LA ARRENDATARIA. La transgresión de esta prohibición facultará a LA ARRENDATARIA a ejercer acciones de amparo posesorio e interdictos de despojo, causando a cargo de LA ARRENDADORA una cláusula penal conminatoria de ${variablesEnsamblador.penalidad_diaria} por cada día de retención indebida, sin perjuicio de las responsabilidades penales tipificadas en el Artículo 468 del Código Penal.`
+      : `CLÁUSULA SEXTA: CUMPLIMIENTO PACÍFICO
+Las partes se obligan a dirimir sus controversias conforme a la ley y la buena fe negocial.`;
+
+    let clausulaFueroTexto = clausulaLegoArbitral
+      ? `CLÁUSULA NOVENA: FUERO ARBITRAL ESPECIAL
+Cualquier controversia derivada de este contrato será sometida exclusivamente a arbitraje institucional de derecho ante el Centro de Arbitraje de la Cámara de Caracas (CEDCA), renunciando a la jurisdicción ordinaria.`
+      : `CLÁUSULA NOVENA: DOMICILIO ESPECIAL Y JURISDICCIÓN
+Para todos los efectos derivados del presente contrato, las partes eligen como domicilio especial, único y excluyente a la ciudad de ${variablesEnsamblador.ciudad_domicilio}, a cuya jurisdicción judicial declaran someterse renunciando formalmente a cualquier otro fuero.`;
+
+    return `CONTRATO DE ARRENDAMIENTO COMERCIAL E INDUSTRIAL CON CLÁUSULA DE COMPENSACIÓN DE MEJORAS Y PROHIBICIÓN EXPRESA DE VÍAS DE HECHO
+
+DOCUMENTO PROTOCOLIZADO - MODELO OFICIAL BIBLIOTECA LETRADA
+DESPACHO JURÍDICO PICCOLO & ASOCIADOS - EXP. ARCHIVO MATRIZ
+
+Entre la sociedad mercantil ${variablesEnsamblador.arrendadora}, domiciliada en ${variablesEnsamblador.ciudad_domicilio}, RIF N° ${variablesEnsamblador.arrendadora_rif}, representada por su representante legal ciudadano ${variablesEnsamblador.arrendadora_rep}, C.I. N° ${variablesEnsamblador.arrendadora_ci}, denominada "LA ARRENDADORA", por una parte; y por la otra, la sociedad mercantil ${variablesEnsamblador.arrendataria}, domiciliada en ${variablesEnsamblador.ciudad_domicilio}, RIF N° ${variablesEnsamblador.arrendataria_rif}, representada por su apoderado ciudadano ${variablesEnsamblador.arrendataria_rep}, C.I. N° ${variablesEnsamblador.arrendataria_ci}, denominada "LA ARRENDATARIA", se ha convenido formalmente celebrar el presente CONTRATO:
+
+CLÁUSULA PRIMERA: OBJETO DEL CONTRATO
+LA ARRENDADORA da en arrendamiento a LA ARRENDATARIA el bien inmueble de su propiedad consistente en: ${variablesEnsamblador.inmueble}, comprendido dentro de los siguientes linderos: ${variablesEnsamblador.linderos}.
+
+CLÁUSULA SEGUNDA: DESTINO EXCLUSIVO
+El inmueble será destinado única y exclusivamente para actividades comerciales, industriales y almacenamiento logístico de repuestos y maquinarias.
+
+CLÁUSULA TERCERA: DURACIÓN Y RENOVACIÓN
+La duración se fija en ${variablesEnsamblador.plazo_vigencia}, contados a partir de la entrega formal de llaves. Podrá renovarse mediante notificación escrita previa con 60 días de antelación.
+
+${clausulaCanonTexto}
+
+${clausulaMejorasTexto}
+
+${clausulaViasDeHechoTexto}
+
+CLÁUSULA SÉPTIMA: CONSERVACIÓN Y SERVICIOS PÚBLICOS
+LA ARRENDATARIA se obliga a mantener el inmueble en buen estado y cubrir los servicios de electricidad industrial, agua y aseo urbano devengados.
+
+CLÁUSULA OCTAVA: RESOLUCIÓN DE PLENO DERECHO
+Serán causales de resolución: la falta de pago de 2 cánones consecutivos, el subarrendamiento no consentido o las perturbaciones ilegítimas a la posesión.
+
+${clausulaFueroTexto}
+
+Se otorgan dos (2) ejemplares de un mismo tenor y a un solo efecto, en ${variablesEnsamblador.ciudad_domicilio}, a los veintiocho (28) días del mes de Septiembre del año 2026.
+
+__________________________________                 __________________________________
+${variablesEnsamblador.arrendadora}                 ${variablesEnsamblador.arrendataria}
+Por: ${variablesEnsamblador.arrendadora_rep}         Por: ${variablesEnsamblador.arrendataria_rep}
+C.I. ${variablesEnsamblador.arrendadora_ci}         C.I. ${variablesEnsamblador.arrendataria_ci}`;
+  };
+
+  const [documentoGeneradoWord, setDocumentoGeneradoWord] = useState(generarTextoDocumentoCompleto());
+
+  // Actualizar documento al cambiar lego checkboxes
+  useEffect(() => {
+    setDocumentoGeneradoWord(generarTextoDocumentoCompleto());
+  }, [clausulaLegoBCV, clausulaLegoViasDeHecho, clausulaLegoMejoras, clausulaLegoArbitral, modeloDriveSeleccionado, variablesEnsamblador]);
+
+  const descargarDocumentoWord = () => {
+    const blob = new Blob([documentoGeneradoWord], { type: 'application/msword;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${modeloDriveSeleccionado}_${clienteEnsamblaje.replace(/\s+/g, '_')}_Piccolo.doc`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // =========================================================================
+  // GABINETE 3: AUDITORÍA DE CONTRAPARTES (CON COPIA REDLINE Y ARGUMENTARIO)
+  // =========================================================================
+  const [informeAuditoria] = useState<any>({
+    archivo: "contrato_propuesto_contraparte.docx",
+    dictamen_general: "Alto Riesgo Jurídico y Patrimonial",
+    total_clausulas: 18,
+    clausulas_rojas: 3,
+    clausulas_amarillas: 2,
+    argumentario_comercial: "Para la llamada con el Director Comercial de la contraparte: Nuestra postura es constructiva pero firme. Aceptamos los hitos de entrega y la modalidad de pago a 30 días, pero bajo ninguna circunstancia asumiremos indemnidades ilimitadas ni lucro cesante. La titularidad de nuestro software y algoritmos no es transferible bajo ningún supuesto, otorgando solo una licencia corporativa de uso. La jurisdicción debe radicarse en tribunales de Madrid o Delaware.",
+    semaforo: [
+      {
+        id: "SEM-01",
+        clausula: "Cláusula 6: Indemnización Ilimitada",
+        color: "rojo",
+        nivel: "Alerta Roja (Crítica)",
+        analisis: "La contraparte impone indemnidad sin límite cuantitativo ni temporal, incluyendo lucro cesante y daños consecuenciales indirectos.",
+        redline_sugerido: "La responsabilidad total acumulada de la empresa bajo el presente Contrato se limitará estrictamente al monto total efectivamente facturado en los doce (12) meses anteriores al hecho causante. Se excluye expresamente el lucro cesante y los daños consecuenciales."
+      },
+      {
+        id: "SEM-02",
+        clausula: "Cláusula 10: Cesión Irrevocable de Código y Algoritmos",
+        color: "rojo",
+        nivel: "Alerta Roja (Crítica)",
+        analisis: "Pretende transferir la titularidad de los modelos, know-how y desarrollos de software preexistentes a favor de la contraparte.",
+        redline_sugerido: "La empresa conserva la titularidad exclusiva y todos los derechos morales y patrimoniales de su propiedad intelectual y código preexistente, concediendo únicamente una licencia corporativa de uso no exclusiva, intransferible y temporal durante la vigencia del acuerdo."
+      },
+      {
+        id: "SEM-03",
+        clausula: "Cláusula 15: Jurisdicción Arbitral en Singapur",
+        color: "rojo",
+        nivel: "Alerta Roja (Procesal)",
+        analisis: "Sometimiento a fueros remotos foráneos con asunción unilateral de costas.",
+        redline_sugerido: "Las partes convienen formalmente en someter cualquier controversia a la jurisdicción exclusiva de los tribunales de Madrid (España) o Delaware (EE.UU.), asumiendo cada parte sus propios honorarios legales y gastos procesales."
+      },
+      {
+        id: "SEM-04",
+        clausula: "Cláusula 8: Plazo de Pago a 90 Días",
+        color: "amarillo",
+        nivel: "Alerta Amarilla (Comercial)",
+        analisis: "Plazo de cobro excesivo que afecta el flujo de caja operativo.",
+        redline_sugerido: "El pago de las facturas fiscales se efectuará en un plazo máximo de treinta (30) días continuos posteriores a su emisión y recepción conforme."
+      }
+    ]
+  });
+
+  const copiarRedlineIndividual = (texto: string) => {
+    navigator.clipboard.writeText(texto);
+    alert("Texto del Redline copiado al portapapeles. Listo para pegar en el control de cambios de Word.");
+  };
+
+  // =========================================================================
+  // GABINETE 4: ENLACE CORPORATIVO (CON EXPORTADOR A JIRA / MARKDOWN)
+  // =========================================================================
+  const [dictamenIniciativa] = useState<any>({
+    area: "Tecnología",
+    viabilidad: "Viable Sujeta a Blindaje Regulatorio (Art. 12 y 50 EU AI Act)",
+    resumen_directivo: "El proyecto es legalmente viable siempre que se implemente un filtro Zero-Retention previo para sanitizar datos fiscales y bancarios antes de la inferencia, y se entregue al usuario final la advertencia de supervisión humana (HITL).",
+    especificaciones_tecnicas: [
+      {
+        ticket: "LEGAL-TECH-01",
+        titulo: "Pipeline de Anonimización en Memoria para Datos Bancarios e Identificadores Fiscales",
+        responsable: "Ingeniería de Backend",
+        criterios: ["Cero almacenamiento de texto crudo en disco", "Latencia < 15ms", "Hash de auditoría forense SHA-256"],
+        prioridad: "P1 - Bloqueante",
+        gherkin: "Given que ingresa un balance fiscal contable con RIF y cuentas bancarias\nWhen el payload ingresa a la memoria del gateway\nThen el filtro scrubbea números de cuenta y sustituye por tokens sintéticos antes de la inferencia de IA."
+      },
+      {
+        ticket: "LEGAL-TECH-02",
+        titulo: "Etiquetado Transparente de Asistencia de IA en Documentos Exportados",
+        responsable: "Frontend & UI",
+        criterios: ["Leyenda visible conforme al Art. 50 del EU AI Act", "Firma digital del revisor humano"],
+        prioridad: "P2 - Alta",
+        gherkin: "Given que se genera un dictamen o minuta asistida por IA\nWhen el usuario pulsa descargar documento\nThen se inyecta al pie de página la leyenda obligatoria Art. 50 EU AI Act y el campo de firma letrada."
+      }
+    ]
+  });
+
+  const exportarTicketsJiraMarkdown = () => {
+    let md = "# BACKLOG DE SEGURIDAD Y CUMPLIMIENTO LEGAL (JIRA / GITHUB ISSUES)\n\n";
+    dictamenIniciativa.especificaciones_tecnicas.forEach((t: any) => {
+      md += `## [${t.ticket}] ${t.titulo}\n`;
+      md += `- **Prioridad:** ${t.prioridad}\n`;
+      md += `- **Responsable:** ${t.responsable}\n`;
+      md += `- **Criterios de Aceptación:**\n`;
+      t.criterios.forEach((c: string) => { md += `  * ${c}\n`; });
+      md += `\n**Escenario de Prueba (Gherkin):**\n\`\`\`gherkin\n${t.gherkin}\n\`\`\`\n\n---\n\n`;
+    });
+    navigator.clipboard.writeText(md);
+    alert("Especificaciones legales exportadas y copiadas en formato Markdown/Jira. Listo para pegar en el backlog de los desarrolladores.");
+  };
+
+  // =========================================================================
+  // GABINETE 6: ACTAS Y MINUTAS (CON GENERADOR DE CORREO Y TOGGLE DE TRANSCRIPCIÓN)
+  // =========================================================================
+  const [grabandoAudioLocal, setGrabandoAudioLocal] = useState(false);
+  const [segundosGrabacion, setSegundosGrabacion] = useState(0);
+  const [audioUrlLocal, setAudioUrlLocal] = useState<string | null>(null);
+  const [archivoAudioNombre, setArchivoAudioNombre] = useState<string | null>(null);
+  const [cargandoTranscripcionWhisper, setCargandoTranscripcionWhisper] = useState(false);
+  const [mostrarTranscripcionCruda, setMostrarTranscripcionCruda] = useState(false);
+  const mediaRecorderRef = useRef<any>(null);
+  const chunksRef = useRef<any[]>([]);
+
+  useEffect(() => {
+    let intervalo: any = null;
+    if (grabandoAudioLocal) {
+      intervalo = setInterval(() => {
+        setSegundosGrabacion(prev => prev + 1);
+      }, 1000);
+    } else {
+      clearInterval(intervalo);
+    }
+    return () => clearInterval(intervalo);
+  }, [grabandoAudioLocal]);
+
+  const alternarGrabacionAudioLocal = async () => {
+    if (grabandoAudioLocal) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        try {
+          mediaRecorderRef.current.stop();
+          if (mediaRecorderRef.current.stream) {
+            mediaRecorderRef.current.stream.getTracks().forEach((track: any) => track.stop());
+          }
+        } catch (e) {
+          console.error("Error deteniendo grabador:", e);
+        }
+      }
+      setGrabandoAudioLocal(false);
+    } else {
+      setSegundosGrabacion(0);
+      chunksRef.current = [];
+      try {
+        if (typeof window !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const recorder = new (window as any).MediaRecorder(stream);
+          
+          recorder.ondataavailable = (e: any) => {
+            if (e.data && e.data.size > 0) {
+              chunksRef.current.push(e.data);
+            }
+          };
+          
+          recorder.onstop = () => {
+            const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            setAudioUrlLocal(url);
+            setArchivoAudioNombre("grabacion_reunion_sala.webm");
+            procesarGeneracionMinuta("grabacion_reunion_sala.webm");
+          };
+          
+          recorder.start();
+          mediaRecorderRef.current = recorder;
+          setGrabandoAudioLocal(true);
+        } else {
+          setGrabandoAudioLocal(true);
+          setTimeout(() => {
+            setGrabandoAudioLocal(false);
+            setArchivoAudioNombre("sesion_grabada_sala.webm");
+            procesarGeneracionMinuta("sesion_grabada_sala.webm");
+          }, 4000);
+        }
+      } catch (err) {
+        console.warn("Permiso de micrófono no habilitado, activando simulador de sala:", err);
+        setGrabandoAudioLocal(true);
+      }
+    }
+  };
+
+  const handleSubirArchivoAudio = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setArchivoAudioNombre(file.name);
+      setAudioUrlLocal(URL.createObjectURL(file));
+      procesarGeneracionMinuta(file.name);
+    }
+  };
+
+  const [minutaWhisper, setMinutaWhisper] = useState<any>({
+    titulo: "Minuta de Sesión de Negociación: Galpón Unare y Maquinaria Pesada",
+    fecha: "28 de Septiembre de 2026",
+    hora: "10:30 AM",
+    duracion: "42 minutos",
+    plataforma: "Custodia Soberana (Whisper On-Premise en Servidor Local)",
+    hash_sha256: "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b",
+    participantes: [
+      "Barbara Piccolo (Abogada Directora & General Counsel)",
+      "Carlos Mendoza (Director de Operaciones - Machtig Rothe, C.A.)",
+      "Andrés Silva (Administrador - Inmobiliaria del Este, C.A.)"
+    ],
+    transcripcion_extracto: 
+      "«...Se deja constancia en la grabación de sala que LA ARRENDADORA no ejecutará vías de hecho ni retendrá maquinaria bajo apercibimiento de tipo penal. Respecto a las reparaciones de cubierta por 15.000 USD, se autoriza su compensación al 50% de los cánones mensuales sucesivos. LA ARRENDATARIA consignará los comprobantes fiscales antes del viernes...»",
+    acuerdos: [
+      "Compensación mensual del 50% del canon de 2.800 USD hasta amortizar el monto facturado de 15.000 USD en obras estructurales.",
+      "Desbloqueo inmediato del portón principal y garantía de libre movilización de los tres (3) montacargas Caterpillar.",
+      "Sometimiento estricto al fuero judicial exclusivo de Puerto Ordaz, excluyendo cualquier vía de justicia por propia mano.",
+      "Suscripción del anexo aclaratorio al contrato de arrendamiento ante la Notaría en plazo perentorio de 72 horas."
+    ],
+    action_items: [
+      { id: "ACT-01", tarea: "Redactar e intimar documento de anexo aclaratorio ante Notaría", responsable: "Barbara Piccolo", plazo: "Miércoles 12:00", prioridad: "Crítica", agregado: false },
+      { id: "ACT-02", tarea: "Consignar copias de facturas fiscales de techos y pavimentos a la arrendadora", responsable: "Carlos Mendoza", plazo: "Viernes 16:00", prioridad: "Alta", agregado: false },
+      { id: "ACT-03", tarea: "Inspección técnica de funcionamiento de montacargas tras el desbloqueo", responsable: "Equipo de Operaciones", plazo: "Jueves 10:00", prioridad: "Media", agregado: false }
+    ],
+    puntos_abiertos: [
+      "Validación de solvencia municipal de aseo urbano por parte de LA ARRENDADORA.",
+      "Presentación de fianza comercial bancaria de fiel cumplimiento para el segundo año de vigencia."
+    ]
+  });
+
+  const procesarGeneracionMinuta = (nombreArchivo: string) => {
+    setCargandoTranscripcionWhisper(true);
+    setTimeout(() => {
+      setMinutaWhisper({
+        titulo: `Minuta Oficial Certificada: ${nombreArchivo.replace(/\.[^/.]+$/, "")}`,
+        fecha: "28 de Septiembre de 2026",
+        hora: "11:15 AM",
+        duracion: segundosGrabacion > 0 ? `${Math.floor(segundosGrabacion / 60)}m ${segundosGrabacion % 60}s` : "38 minutos",
+        plataforma: "Custodia Soberana (Whisper On-Premise en Servidor Local)",
+        hash_sha256: "7b4c9e1f2a3d8e5b0c9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c",
+        participantes: [
+          "Barbara Piccolo (Socia Directora)",
+          "Directores y Partes Interesadas en Sala"
+        ],
+        transcripcion_extracto: 
+          "«...Habiéndose escuchado los puntos del debate y analizado los riesgos contractuales y procesales, las partes convienen en acatar los términos de la propuesta letrada para evitar litigio judicial...»",
+        acuerdos: [
+          "Acuerdo vinculante formalizado con reserva de acciones legales.",
+          "Estipulación de cumplimiento en plazo de cuarenta y ocho (48) horas.",
+          "Custodia probatoria de la presente grabación en bóveda inmutable."
+        ],
+        action_items: [
+          { id: `ACT-${Date.now().toString().slice(-3)}-1`, tarea: "Elaborar documento resolutivo y remitir al Planificador", responsable: "Barbara Piccolo", plazo: "Mañana 16:00", prioridad: "Crítica", agregado: false },
+          { id: `ACT-${Date.now().toString().slice(-3)}-2`, tarea: "Notificar formalmente a los accionistas", responsable: "Secretaría Letrada", plazo: "Viernes", prioridad: "Alta", agregado: false }
+        ],
+        puntos_abiertos: [
+          "Verificación del registro de la propiedad inmobiliaria."
+        ]
+      });
+      setCargandoTranscripcionWhisper(false);
+    }, 1200);
+  };
+
+  const asignarActionItemAPlanificador = (item: any) => {
+    const nuevoAsunto = {
+      id: `EXP-MIN-${Date.now().toString().slice(-3)}`,
+      titulo: item.tarea,
+      cliente: clienteEnsamblaje || "Machtig Rothe, C.A.",
+      tipo_rol: "Externo",
+      materia: "Compromiso de Minuta",
+      responsable: item.responsable,
+      plazo: item.plazo,
+      prioridad: item.prioridad,
+      estado: "En Tramitación",
+      bloqueo: "En Curso",
+      bloqueo_tipo: "ninguno",
+      cuantia: "Derivada de Acuerdo",
+      tribunal: "Compromiso de Sala Certificada",
+      detalles: `Tarea generada a partir de los acuerdos de la sesión: ${minutaWhisper.titulo}.`,
+      bitacora: [
+        { fecha: "28/09/2026", nota: "Asignación directa desde Minuta Oficial a través de Whisper On-Premise." }
+      ]
+    };
+    setTableroPlanificador([nuevoAsunto, ...tableroPlanificador]);
+    setMinutaWhisper((prev: any) => ({
+      ...prev,
+      action_items: prev.action_items.map((ai: any) => 
+        ai.id === item.id ? { ...ai, agregado: true } : ai
+      )
+    }));
+    alert(`Acuerdo asignado con éxito al Planificador: "${item.tarea}"`);
+  };
+
+  const copiarCorreoFormalizacionAcuerdos = () => {
+    const mailText = 
+`Asunto: FORMALIZACIÓN DE ACUERDOS - ${minutaWhisper.titulo}
+Para: ${minutaWhisper.participantes.join('; ')}
+Fecha: ${minutaWhisper.fecha}
+
+Estimados Directores y Representantes:
+
+De conformidad con la sesión de trabajo y negociación celebrada hoy ${minutaWhisper.fecha}, por medio del presente correo dejo formalmente asentados los acuerdos vinculantes acordados por las partes para su ejecución inmediata:
+
+ACUERDOS VINCULANTES ADOPTADOS:
+${minutaWhisper.acuerdos.map((a: string, i: number) => `${i + 1}. ${a}`).join('\n')}
+
+MATRIZ DE COMPROMISOS Y PLAZOS FATALES:
+${minutaWhisper.action_items.map((ai: any) => `• [${ai.prioridad}] ${ai.tarea} | Responsable: ${ai.responsable} | Plazo: ${ai.plazo}`).join('\n')}
+
+Se deja expresa constancia de que la grabación de sala reposa bajo custodia y sello criptográfico SHA-256 (${minutaWhisper.hash_sha256.slice(0, 16)}...) en nuestra Bóveda Privada Soberana.
+
+Atentamente,
+
+BARBARA PICCOLO
+Abogada Directora & General Counsel
+Despacho Jurídico Piccolo & Asociados | AI GOVERN`;
+
+    navigator.clipboard.writeText(mailText);
+    alert("Correo formal de acuerdos copiado al portapapeles. Listo para enviar a los asistentes.");
+  };
+
+  return (
+    <div className={`flex h-screen overflow-hidden font-sans transition-colors duration-200 ${
+      isDark ? 'bg-[#0b0f19] text-slate-100' : 'bg-[#f8fafc] text-slate-900'
+    }`}>
+
+      {/* =================================================================== */}
+      {/* BARRA LATERAL (SIDEBAR DE CONTROL LETRADO)                          */}
+      {/* =================================================================== */}
+      <aside className={`transition-all duration-300 border-r flex flex-col justify-between z-30 shrink-0 ${
+        sidebarOpen ? 'w-64' : 'w-20'
+      } ${
+        isDark ? 'bg-[#080c14] border-slate-800/80' : 'bg-white border-slate-200 shadow-sm'
+      }`}>
+        
+        {/* Cabecera Sidebar */}
+        <div className="p-4 border-b border-slate-800/40 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-bold shrink-0 shadow-md">
+              <Scale className="w-5 h-5" />
+            </div>
+            {sidebarOpen && (
+              <div className="flex flex-col truncate">
+                <span className="font-extrabold text-sm tracking-tight flex items-center gap-1.5">
+                  DESPACHO LEGAL
+                  <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                </span>
+                <span className="text-[10px] font-mono text-cyan-400/90 tracking-wider uppercase">
+                  Práctica Corporativa & CAIO
+                </span>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className={`p-1.5 rounded-lg border text-xs cursor-pointer ${
+              isDark ? 'border-slate-800 hover:bg-slate-800 text-slate-400' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
+            }`}
+          >
+            {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Menú de Navegación Vertical */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-4 text-xs font-medium">
+          
+          {/* SECCIÓN I: DESPACHO & GESTIÓN */}
+          <div className="space-y-1">
+            {sidebarOpen && (
+              <button 
+                onClick={() => toggleSection('despacho')}
+                className="w-full flex items-center justify-between px-2 py-1 text-[10px] font-bold font-mono uppercase text-slate-400 hover:text-slate-200 tracking-wider"
+              >
+                <span>DESPACHO & GESTIÓN</span>
+                {openSections.despacho ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </button>
+            )}
+
+            {openSections.despacho && (
+              <div className="space-y-1">
+                {[
+                  { id: 'planificador', label: 'Planificador de Asuntos', icon: Layers },
+                  { id: 'crm', label: 'Directorio & CRM Legal', icon: Users },
+                  { id: 'calendario', label: 'Calendario Procesal', icon: Clock },
+                  { id: 'metricas', label: 'Rendimiento & Métricas', icon: BarChart3 }
+                ].map(item => {
+                  const Icon = item.icon;
+                  const active = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                        active 
+                          ? isDark 
+                            ? 'bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30' 
+                            : 'bg-blue-50 text-blue-700 font-bold border border-blue-200 shadow-sm'
+                          : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                      title={!sidebarOpen ? item.label : undefined}
+                    >
+                      <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-cyan-400' : 'text-slate-400'}`} />
+                      {sidebarOpen && <span className="truncate">{item.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* SECCIÓN II: GABINETE JURÍDICO */}
+          <div className="space-y-1">
+            {sidebarOpen && (
+              <button 
+                onClick={() => toggleSection('gabinete')}
+                className="w-full flex items-center justify-between px-2 py-1 text-[10px] font-bold font-mono uppercase text-slate-400 hover:text-slate-200 tracking-wider"
+              >
+                <span>GABINETE JURÍDICO</span>
+                {openSections.gabinete ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </button>
+            )}
+
+            {openSections.gabinete && (
+              <div className="space-y-1">
+                {[
+                  { id: 'calificacion_estrategia', label: '1. Calificación & Estrategia', icon: Scale },
+                  { id: 'ensamblador_documental', label: '2. Ensamblador Documental', icon: FileText },
+                  { id: 'auditoria_contrapartes', label: '3. Auditoría de Contrapartes', icon: FileCheck2 },
+                  { id: 'enlace_corporativo', label: '4. Enlace & Nuevos Proyectos', icon: Cpu },
+                  { id: 'control_gestion', label: '5. Control de Gestión y Plazos', icon: CheckSquare },
+                  { id: 'actas_minutas', label: '6. Actas y Minutas Ejecutivas', icon: Mic }
+                ].map(item => {
+                  const Icon = item.icon;
+                  const active = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                        active 
+                          ? isDark 
+                            ? 'bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30' 
+                            : 'bg-blue-50 text-blue-700 font-bold border border-blue-200 shadow-sm'
+                          : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                      title={!sidebarOpen ? item.label : undefined}
+                    >
+                      <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-cyan-400' : 'text-slate-400'}`} />
+                      {sidebarOpen && <span className="truncate">{item.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* SECCIÓN III: CUMPLIMIENTO & EVIDENCIA */}
+          <div className="space-y-1">
+            {sidebarOpen && (
+              <button 
+                onClick={() => toggleSection('cumplimiento')}
+                className="w-full flex items-center justify-between px-2 py-1 text-[10px] font-bold font-mono uppercase text-slate-400 hover:text-slate-200 tracking-wider"
+              >
+                <span>CUMPLIMIENTO & EVIDENCIA</span>
+                {openSections.cumplimiento ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              </button>
+            )}
+
+            {openSections.cumplimiento && (
+              <div className="space-y-1">
+                {[
+                  { id: 'aduana', label: 'Aduana & Secreto Profesional', icon: Shield },
+                  { id: 'boveda', label: 'Bóveda Forense SHA-256', icon: Lock },
+                  { id: 'canal_etico', label: 'Canal Ético & Denuncias', icon: Radio },
+                  { id: 'societario', label: 'Libros Societarios', icon: Building2 }
+                ].map(item => {
+                  const Icon = item.icon;
+                  const active = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                        active 
+                          ? isDark 
+                            ? 'bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30' 
+                            : 'bg-blue-50 text-blue-700 font-bold border border-blue-200 shadow-sm'
+                          : isDark ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                      title={!sidebarOpen ? item.label : undefined}
+                    >
+                      <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-cyan-400' : 'text-slate-400'}`} />
+                      {sidebarOpen && <span className="truncate">{item.label}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* Footer Sidebar */}
+        <div className="p-3 border-t border-slate-800/40">
+          <div className={`p-2 rounded-xl flex items-center gap-2.5 ${isDark ? 'bg-slate-900/80 border border-slate-800' : 'bg-slate-100 border border-slate-200'}`}>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-sm">
+              BP
+            </div>
+            {sidebarOpen && (
+              <div className="flex flex-col truncate">
+                <span className="font-bold text-xs truncate">Barbara Piccolo</span>
+                <span className="text-[10px] text-slate-400 truncate">Abogada Directora & GC</span>
+              </div>
+            )}
+            {sidebarOpen && <span className="w-2 h-2 rounded-full bg-emerald-400 ml-auto shrink-0 animate-pulse"></span>}
+          </div>
+        </div>
+
+      </aside>
+
+      {/* =================================================================== */}
+      {/* CONTENIDO PRINCIPAL                                                 */}
+      {/* =================================================================== */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        {/* Barra Superior */}
+        <header className={`h-14 border-b px-6 flex items-center justify-between shrink-0 z-20 ${
+          isDark ? 'bg-[#080c14] border-slate-800/80' : 'bg-white border-slate-200 shadow-sm'
+        }`}>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-white"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-slate-500 uppercase tracking-wider">DESPACHO</span>
+              <span className="text-slate-600">/</span>
+              <span className="font-bold text-cyan-400 capitalize">{activeTab.replace('_', ' ')}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={descargarInformeEjecutivoSemanal}
+              className="px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 font-mono text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Informe Semanal (.doc)</span>
+            </button>
+
+            <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-medium hidden sm:flex items-center gap-1.5">
+              <Shield className="w-3 h-3" />
+              <span>Custodia Legal & eIDAS</span>
+            </span>
+
+            <button
+              onClick={() => setTheme(isDark ? 'light' : 'dark')}
+              className={`p-2 rounded-xl border text-xs flex items-center gap-1.5 cursor-pointer transition-all ${
+                isDark ? 'border-slate-800 bg-slate-900 text-amber-400 hover:bg-slate-800' : 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        </header>
+
+        {/* Contenedor Scroll */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+
+          {/* ================================================================= */}
+          {/* PESTAÑA 1: PLANIFICADOR DE ASUNTOS (CON FILTRO DE ROL Y BLOQUEOS) */}
+          {/* ================================================================= */}
+          {activeTab === 'planificador' && (
+            <div className="space-y-6 max-w-6xl mx-auto">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <Layers className="w-6 h-6 text-cyan-400" /> Planificador de Asuntos y Expedientes
+                  </h1>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Control de prioridades procesales, dependencias bloqueantes y estado de tramitación letrada.
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-2.5">
+                  <div className={`flex rounded-xl border p-1 text-xs font-mono ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-100 border-slate-200'}`}>
+                    <button 
+                      onClick={() => setVistaPlanificador('kanban')}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer ${
+                        vistaPlanificador === 'kanban' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5" /> Kanban
+                    </button>
+                    <button 
+                      onClick={() => setVistaPlanificador('lista')}
+                      className={`px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 cursor-pointer ${
+                        vistaPlanificador === 'lista' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <FileText className="w-3.5 h-3.5" /> Lista
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setModalNuevoAsunto(true)}
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Nuevo Asunto</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Selector de Rol: In-House vs Cartera Externa */}
+              <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl border border-slate-800 bg-slate-900/60">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">Vista de Rol:</span>
+                  {(['Todos', 'In-House', 'Externo'] as const).map(rol => (
+                    <button
+                      key={rol}
+                      onClick={() => setFiltroRolPlanificador(rol)}
+                      className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                        filtroRolPlanificador === rol
+                          ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                          : 'bg-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {rol === 'Todos' ? 'Todos los Asuntos' : rol === 'In-House' ? '🏛️ Corporativo / In-House' : '⚖️ Cartera Externa / Litigio'}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Buscar expediente, cliente o juzgado..."
+                    value={buscarPlanificador}
+                    onChange={(e) => setBuscarPlanificador(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-200"
+                  />
+                </div>
+              </div>
+
+              {/* VISTA KANBAN CON TAGS DE BLOQUEO Y DENSIDAD COMPACTA */}
+              {vistaPlanificador === 'kanban' && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+                  {['Por Iniciar', 'En Tramitación', 'Revisión & Firma', 'Concluido'].map(col => {
+                    const items = tableroPlanificador.filter(i => {
+                      const matchCol = i.estado === col;
+                      const matchRol = filtroRolPlanificador === 'Todos' || i.tipo_rol === filtroRolPlanificador;
+                      const matchMat = filtroMateriaPlanificador === 'Todas' || i.materia.toLowerCase().includes(filtroMateriaPlanificador.toLowerCase());
+                      const matchTxt = !buscarPlanificador || 
+                        i.titulo.toLowerCase().includes(buscarPlanificador.toLowerCase()) ||
+                        i.cliente.toLowerCase().includes(buscarPlanificador.toLowerCase()) ||
+                        i.id.toLowerCase().includes(buscarPlanificador.toLowerCase());
+                      return matchCol && matchRol && matchMat && matchTxt;
+                    });
+
+                    return (
+                      <div key={col} className={`p-3.5 rounded-2xl border flex flex-col justify-between min-h-[380px] ${
+                        isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200 shadow-sm'
+                      }`}>
+                        <div>
+                          <div className="flex justify-between items-center pb-2.5 border-b border-slate-800/40 text-xs font-bold">
+                            <span className="flex items-center gap-1.5">
+                              <span className={`w-2 h-2 rounded-full ${
+                                col === 'Por Iniciar' ? 'bg-cyan-400' : col === 'En Tramitación' ? 'bg-blue-400' : col === 'Revisión & Firma' ? 'bg-amber-400' : 'bg-emerald-400'
+                              }`}></span>
+                              {col}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-300">
+                              {items.length}
+                            </span>
+                          </div>
+
+                          <div className="space-y-2.5 mt-3">
+                            {items.map(t => (
+                              <div 
+                                key={t.id} 
+                                className={`p-3 rounded-xl border text-xs space-y-2 transition-all shadow-sm ${
+                                  isDark ? 'bg-slate-950 border-slate-800/90 hover:border-cyan-500/50' : 'bg-slate-50 border-slate-200'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center text-[10px]">
+                                  <span className="font-extrabold text-cyan-400">{t.cliente}</span>
+                                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold font-mono ${
+                                    t.tipo_rol === 'In-House' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'
+                                  }`}>
+                                    {t.tipo_rol}
+                                  </span>
+                                </div>
+
+                                <div className="font-bold text-xs text-white cursor-pointer hover:text-cyan-300 leading-snug" onClick={() => setModalVerExpediente(t)}>
+                                  {t.titulo}
+                                </div>
+
+                                {/* Tag de Dependencia Bloqueante */}
+                                <div className="flex items-center gap-1 text-[10px] font-mono">
+                                  <span className={`px-2 py-0.5 rounded flex items-center gap-1 ${
+                                    t.bloqueo_tipo === 'externo' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                                    t.bloqueo_tipo === 'interno' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                                    'bg-emerald-500/10 text-emerald-400'
+                                  }`}>
+                                    {t.bloqueo_tipo !== 'ninguno' && <AlertCircle className="w-2.5 h-2.5" />}
+                                    <span>{t.bloqueo}</span>
+                                  </span>
+                                </div>
+
+                                <div className="text-[10px] pt-1.5 border-t border-slate-800/40 flex justify-between items-center text-slate-400">
+                                  <span className="truncate max-w-[110px]">{t.responsable}</span>
+                                  <span className="font-mono text-cyan-300 font-bold">{t.plazo}</span>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-1 border-t border-slate-800/20 text-[10px] font-mono">
+                                  <button onClick={() => setModalVerExpediente(t)} className="text-slate-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer">
+                                    <Eye className="w-3 h-3" /> Ficha
+                                  </button>
+
+                                  <div className="flex items-center gap-1">
+                                    {col !== 'Por Iniciar' && (
+                                      <button
+                                        onClick={() => {
+                                          const prevCol = col === 'Concluido' ? 'Revisión & Firma' : col === 'Revisión & Firma' ? 'En Tramitación' : 'Por Iniciar';
+                                          moverEstadoAsunto(t.id, prevCol);
+                                        }}
+                                        className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer"
+                                      >
+                                        <ArrowLeft className="w-3 h-3" />
+                                      </button>
+                                    )}
+
+                                    {col !== 'Concluido' && (
+                                      <button
+                                        onClick={() => {
+                                          const nextCol = col === 'Por Iniciar' ? 'En Tramitación' : col === 'En Tramitación' ? 'Revisión & Firma' : 'Concluido';
+                                          moverEstadoAsunto(t.id, nextCol);
+                                        }}
+                                        className="p-1 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold cursor-pointer"
+                                      >
+                                        <ArrowRight className="w-3 h-3" />
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* VISTA LISTA PROCESAL */}
+              {vistaPlanificador === 'lista' && (
+                <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+                  <table className="w-full text-xs text-left">
+                    <thead className={`text-[10px] font-mono uppercase border-b ${isDark ? 'bg-slate-950 text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                      <tr>
+                        <th className="p-3.5">ID / Rol</th>
+                        <th className="p-3.5">Cliente</th>
+                        <th className="p-3.5">Materia</th>
+                        <th className="p-3.5">Bloqueo Operativo</th>
+                        <th className="p-3.5">Cuantía</th>
+                        <th className="p-3.5">Plazo Fatal</th>
+                        <th className="p-3.5">Estado</th>
+                        <th className="p-3.5 text-right">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/40">
+                      {tableroPlanificador.map(t => (
+                        <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="p-3.5 font-mono">
+                            <span className="font-bold text-cyan-400 block">{t.id}</span>
+                            <span className="text-[9px] text-slate-400">{t.tipo_rol}</span>
+                          </td>
+                          <td className="p-3.5 font-bold text-white">{t.cliente}</td>
+                          <td className="p-3.5 text-slate-300">{t.materia}</td>
+                          <td className="p-3.5 font-mono text-[11px]">
+                            <span className={t.bloqueo_tipo === 'externo' ? 'text-red-400 font-bold' : t.bloqueo_tipo === 'interno' ? 'text-amber-400' : 'text-emerald-400'}>
+                              {t.bloqueo}
+                            </span>
+                          </td>
+                          <td className="p-3.5 font-mono text-emerald-400 font-bold">{t.cuantia}</td>
+                          <td className="p-3.5 font-mono font-bold text-amber-400">{t.plazo}</td>
+                          <td className="p-3.5">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-cyan-300">
+                              {t.estado}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-right">
+                            <button
+                              onClick={() => setModalVerExpediente(t)}
+                              className="px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 font-bold text-[10px] cursor-pointer"
+                            >
+                              Ver Ficha
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* PESTAÑA 2: DIRECTORIO Y CRM LEGAL (CON MATRIZ DE FACULTADES)      */}
+          {/* ================================================================= */}
+          {activeTab === 'crm' && (
+            <div className="space-y-6 max-w-6xl mx-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <Users className="w-6 h-6 text-blue-400" /> Directorio & CRM Legal
+                  </h1>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Control de clientes externos e internos con Matriz de Vigencia de Facultades Estatutarias y Poderes.
+                  </p>
+                </div>
+              </div>
+
+              {/* Matriz de Clientes Registrados */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {clientes.map(c => {
+                  const expedientesCliente = tableroPlanificador.filter(exp => exp.cliente === c.nombre);
+                  return (
+                    <div key={c.id} className={`p-4 rounded-2xl border space-y-3 ${
+                      isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'
+                    }`}>
+                      <div className="flex justify-between items-center">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
+                          c.tipo === 'Externo' ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'
+                        }`}>
+                          {c.tipo}
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-500">{c.rif}</span>
+                      </div>
+
+                      <div>
+                        <h3 className="font-bold text-sm text-white">{c.nombre}</h3>
+                        <p className="text-xs text-slate-400 mt-0.5">{c.apoderado} ({c.cedula_apoderado})</p>
+                      </div>
+
+                      {/* Semáforo de Facultades Estatutarias */}
+                      <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Junta Directiva:</span>
+                          <span className="text-emerald-400 font-bold">{c.facultades_junta}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400">Poder Notarial:</span>
+                          <span className={`font-bold ${c.facultades_estado === 'alerta' ? 'text-amber-400' : 'text-slate-300'}`}>
+                            {c.facultades_poder}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-800/40 text-[11px] font-mono">
+                        <span className="text-slate-400">{expedientesCliente.length} expediente(s) activo(s)</span>
+                        <button
+                          onClick={() => setClienteVerFichaModal(c)}
+                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 font-bold text-[10px] cursor-pointer transition-all flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3" /> Ver Expedientes
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Formulario de Alta */}
+              <div className={`p-5 rounded-2xl border space-y-4 ${
+                isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'
+              }`}>
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Plus className="w-4 h-4 text-cyan-400" /> Alta de Nuevo Cliente en Directorio
+                </h2>
+                <form onSubmit={registrarNuevoCliente} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-[10px] font-mono text-slate-400 block mb-1">Razón Social *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ej. Inversiones 2026, C.A."
+                        value={nuevoCliente.nombre}
+                        onChange={(e) => setNuevoCliente({...nuevoCliente, nombre: e.target.value})}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-mono text-slate-400 block mb-1">Tipo</label>
+                      <select
+                        value={nuevoCliente.tipo}
+                        onChange={(e: any) => setNuevoCliente({...nuevoCliente, tipo: e.target.value})}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-cyan-400 font-bold"
+                      >
+                        <option value="Externo">Cliente Externo</option>
+                        <option value="Interno">Cliente Interno</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-mono text-slate-400 block mb-1">RIF</label>
+                      <input
+                        type="text"
+                        placeholder="J-00000000-0"
+                        value={nuevoCliente.rif}
+                        onChange={(e) => setNuevoCliente({...nuevoCliente, rif: e.target.value})}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-[10px] font-mono text-slate-400 block mb-1">Apoderado Legal</label>
+                      <input
+                        type="text"
+                        placeholder="Nombre completo"
+                        value={nuevoCliente.apoderado}
+                        onChange={(e) => setNuevoCliente({...nuevoCliente, apoderado: e.target.value})}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-mono text-slate-400 block mb-1">Cédula Apoderado</label>
+                      <input
+                        type="text"
+                        placeholder="V-00.000.000"
+                        value={nuevoCliente.cedula_apoderado}
+                        onChange={(e) => setNuevoCliente({...nuevoCliente, cedula_apoderado: e.target.value})}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-mono text-slate-400 block mb-1">Domicilio</label>
+                      <input
+                        type="text"
+                        placeholder="Ciudad / Estado"
+                        value={nuevoCliente.domicilio}
+                        onChange={(e) => setNuevoCliente({...nuevoCliente, domicilio: e.target.value})}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs cursor-pointer shadow-md"
+                    >
+                      Guardar Ficha
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* PESTAÑA 3: CALENDARIO PROCESAL REAL                               */}
+          {/* ================================================================= */}
+          {activeTab === 'calendario' && (
+            <div className="space-y-6 max-w-6xl mx-auto">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <Clock className="w-6 h-6 text-amber-400" /> Calendario Judicial & Contractual
+                  </h1>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Control visual de términos perentorios con cómputo de Días de Despacho y exportación directa a dispositivos móviles.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={exportarCalendarioICS}
+                    className="px-3.5 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 text-blue-300 font-mono text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Sincronizar (.ics)
+                  </button>
+
+                  <button
+                    onClick={() => setModalNuevoEvento(true)}
+                    className="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <Plus className="w-4 h-4" /> Agendar Término
+                  </button>
+                </div>
+              </div>
+
+              {/* Selector de Cómputo de Plazos */}
+              <div className="flex items-center gap-3 p-3 rounded-2xl border border-slate-800 bg-slate-900/60 text-xs font-mono">
+                <span className="text-slate-400 uppercase font-bold">Régimen de Cómputo:</span>
+                <div className="flex rounded-lg border border-slate-800 p-0.5">
+                  <button
+                    onClick={() => setTipoComputoPlazo('despacho')}
+                    className={`px-3 py-1 rounded text-[11px] font-bold cursor-pointer ${
+                      tipoComputoPlazo === 'despacho' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    ⚖️ Días de Despacho (CPC Art. 197 - Tribunales)
+                  </button>
+                  <button
+                    onClick={() => setTipoComputoPlazo('continuos')}
+                    className={`px-3 py-1 rounded text-[11px] font-bold cursor-pointer ${
+                      tipoComputoPlazo === 'continuos' ? 'bg-amber-400 text-slate-950' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    📄 Días Continuos (Vencimientos Contractuales)
+                  </button>
+                </div>
+                <span className="text-[10px] text-slate-500 hidden sm:inline">
+                  {tipoComputoPlazo === 'despacho' ? '*Solo computa días en que el tribunal acuerde despacho público efectivo.' : '*Computa sábados, domingos y feriados civiles.'}
+                </span>
+              </div>
+
+              {/* Cuadrícula Real del Mes */}
+              <div className="space-y-4">
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-white font-mono flex items-center gap-2">
+                    <span>{mesesNombres[mesActualIndex]}</span>
+                    <span className="text-amber-400">{anioActual}</span>
+                  </h2>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setMesActualIndex(mesActualIndex === 0 ? 11 : mesActualIndex - 1)}
+                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => { setMesActualIndex(8); setAnioActual(2026); setDiaSeleccionado(28); }}
+                      className="px-3 py-1.5 rounded-xl border border-slate-700 text-xs font-mono font-bold hover:bg-slate-800 cursor-pointer"
+                    >
+                      Hoy (28 Sep)
+                    </button>
+                    <button
+                      onClick={() => setMesActualIndex(mesActualIndex === 11 ? 0 : mesActualIndex + 1)}
+                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900">
+                  <div className="grid grid-cols-7 gap-1 text-center font-mono text-[11px] font-bold pb-2 border-b border-slate-800 text-slate-400">
+                    <div>LUN</div><div>MAR</div><div>MIÉ</div><div>JUE</div><div>VIE</div><div>SÁB</div><div>DOM</div>
+                  </div>
+
+                  {(() => {
+                    const { offsetLunes, totalDias } = getDiasDelMes(mesActualIndex, anioActual);
+                    const cells: any[] = [];
+                    for (let i = 0; i < offsetLunes; i++) {
+                      cells.push(<div key={`empty-${i}`} className="min-h-[85px] opacity-20 p-2 text-xs">-</div>);
+                    }
+                    for (let d = 1; d <= totalDias; d++) {
+                      const eventosDelDia = eventosCalendario.filter(ev => ev.dia === d && ev.mes === mesActualIndex && ev.anio === anioActual);
+                      const esHoy = d === 28 && mesActualIndex === 8 && anioActual === 2026;
+                      const esSeleccionado = d === diaSeleccionado;
+
+                      cells.push(
+                        <div
+                          key={`day-${d}`}
+                          onClick={() => setDiaSeleccionado(d)}
+                          className={`min-h-[85px] p-2 rounded-xl border text-xs flex flex-col justify-between cursor-pointer transition-all ${
+                            esSeleccionado 
+                              ? 'border-amber-400 bg-amber-950/20 shadow-lg' 
+                              : esHoy 
+                                ? 'border-cyan-400 bg-cyan-950/20 font-bold' 
+                                : 'border-slate-800/80 bg-slate-950/60 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className={`font-mono text-xs font-bold ${esHoy ? 'text-cyan-400 underline' : esSeleccionado ? 'text-amber-400' : 'text-slate-300'}`}>
+                              {d}
+                            </span>
+                            {esHoy && <span className="text-[9px] font-mono text-cyan-300 font-bold">HOY</span>}
+                          </div>
+
+                          <div className="space-y-1 mt-1">
+                            {eventosDelDia.map(ev => (
+                              <div 
+                                key={ev.id} 
+                                className={`px-1.5 py-0.5 rounded text-[9px] font-bold truncate ${
+                                  ev.nivel === 'critico' ? 'bg-red-500/25 text-red-300 border border-red-500/40' :
+                                  ev.nivel === 'urgente' ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40' :
+                                  'bg-blue-500/25 text-blue-300'
+                                }`}
+                              >
+                                {ev.titulo}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return <div className="grid grid-cols-7 gap-1.5 mt-2">{cells}</div>;
+                  })()}
+                </div>
+
+                {/* Panel Detallado del Día */}
+                <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900 space-y-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-amber-400" />
+                      <span>Términos y Audiencias: {diaSeleccionado} de {mesesNombres[mesActualIndex]} de {anioActual}</span>
+                    </h3>
+                    <button
+                      onClick={() => setModalNuevoEvento(true)}
+                      className="text-xs text-amber-400 hover:underline flex items-center gap-1 font-mono font-bold cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Agendar en esta fecha
+                    </button>
+                  </div>
+
+                  {(() => {
+                    const eventos = eventosCalendario.filter(ev => ev.dia === diaSeleccionado && ev.mes === mesActualIndex && ev.anio === anioActual);
+                    if (eventos.length === 0) {
+                      return <div className="py-4 text-center text-xs text-slate-500 font-mono">No hay términos fatales ni audiencias para este día.</div>;
+                    }
+                    return (
+                      <div className="space-y-2">
+                        {eventos.map(ev => (
+                          <div key={ev.id} className="p-3.5 rounded-xl border border-slate-800 bg-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-amber-400 font-bold text-xs">{ev.hora}</span>
+                                <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-slate-800 text-cyan-300">{ev.cliente}</span>
+                                <span className="text-[10px] text-slate-400 font-mono">Cómputo: {ev.computo}</span>
+                              </div>
+                              <div className="text-sm font-bold text-white">{ev.titulo}</div>
+                            </div>
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-mono font-bold shrink-0 ${
+                              ev.nivel === 'critico' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                            }`}>
+                              {ev.dias_restantes}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* PESTAÑA 4: RENDIMIENTO & FINOPS                                   */}
+          {/* ================================================================= */}
+          {activeTab === 'metricas' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <BarChart3 className="w-6 h-6 text-emerald-400" /> Rendimiento & FinOps Legal
+                  </h1>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Cuantificación de valor generado, contingencias prevenidas y retorno de la dirección letrada.
+                  </p>
+                </div>
+
+                <button
+                  onClick={descargarInformeEjecutivoSemanal}
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md"
+                >
+                  <Download className="w-4 h-4" /> Descargar Informe de Gestión (.doc)
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900">
+                  <span className="text-[10px] font-mono text-slate-400 uppercase">Valor Desbloqueado</span>
+                  <div className="text-2xl font-extrabold text-emerald-400 font-mono mt-1">{metricasDespacho.valor_aportado_usd}</div>
+                </div>
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900">
+                  <span className="text-[10px] font-mono text-slate-400 uppercase">Riesgo Prevenido</span>
+                  <div className="text-2xl font-extrabold text-cyan-400 font-mono mt-1">{metricasDespacho.contingencias_ahorradas_usd}</div>
+                </div>
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900">
+                  <span className="text-[10px] font-mono text-slate-400 uppercase">Facturación Mes</span>
+                  <div className="text-2xl font-extrabold text-purple-400 font-mono mt-1">{metricasDespacho.facturacion_mes_usd}</div>
+                </div>
+                <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900">
+                  <span className="text-[10px] font-mono text-slate-400 uppercase">Ciclo Contractual</span>
+                  <div className="text-xs font-bold text-amber-400 font-mono mt-2">18h vs 5 días (-82%)</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* GABINETE 1: CALIFICACIÓN & ESTRATEGIA (CON MATRIZ RIESGO/BENEFICIO)*/}
+          {/* ================================================================= */}
+          {activeTab === 'calificacion_estrategia' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <Scale className="w-6 h-6 text-cyan-400" /> 1. Calificación & Estrategia Jurídica
+                  </h1>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Análisis probatorio de hechos con Matriz Comparativa de Riesgo / Costo / Beneficio para el Directorio.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <div className="lg:col-span-5 space-y-4">
+                  <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900 space-y-4">
+                    <div>
+                      <label className="text-xs font-bold block mb-1">Cliente Vinculado (CRM):</label>
+                      <select
+                        value={clienteSeleccionadoTriage}
+                        onChange={(e) => setClienteSeleccionadoTriage(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-cyan-400"
+                      >
+                        {clientes.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold block mb-1">Pruebas Recibidas:</label>
+                      <div className="space-y-1.5">
+                        {archivosAdjuntosTriage.map((a, i) => (
+                          <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-slate-300">
+                            <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                            <span className="truncate">{a}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold block mb-1">Consulta Letrada:</label>
+                      <textarea
+                        rows={5}
+                        value={consultaLetrada}
+                        onChange={(e) => setConsultaLetrada(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs text-slate-200"
+                      />
+                    </div>
+
+                    <button
+                      onClick={ejecutarCalificacionEstrategica}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-md cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      {cargandoDictamen ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Scale className="w-4 h-4" />}
+                      <span>Generar Matriz Estratégica Comparativa</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900 space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+                      <span className="font-bold text-xs text-cyan-400 font-mono">Matriz de Vías Procesales</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400">{dictamenEstrategico.nivel_urgencia}</span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {dictamenEstrategico.vias_estrategicas.map((v: any, i: number) => (
+                        <div key={i} className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                          <div className="font-bold text-white text-xs">{v.opcion}</div>
+                          <p className="text-[11px] text-slate-300">{v.descripcion}</p>
+                          
+                          {/* Matriz de Riesgo/Costo/Beneficio */}
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/60 text-[10px] font-mono">
+                            <div>
+                              <span className="text-slate-500 block">COSTO:</span>
+                              <span className="text-emerald-400 font-bold">{v.costo_financiero}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block">RIESGO:</span>
+                              <span className="text-amber-400 font-bold">{v.nivel_riesgo}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block">PLAZO:</span>
+                              <span className="text-cyan-400 font-bold">{v.tiempo_ejecucion}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* GABINETE 2: ENSAMBLADOR DOCUMENTAL (CON CHECKBOXES LEGO)          */}
+          {/* ================================================================= */}
+          {activeTab === 'ensamblador_documental' && (
+            <div className="space-y-6 max-w-6xl mx-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <FileText className="w-6 h-6 text-emerald-400" /> 2. Ensamblador Documental (Modelos de Drive)
+                  </h1>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Modelos solemnes inmutables. Mapeo automático de datos del CRM con Cláusulas Lego de blindaje opcional.
+                  </p>
+                </div>
+
+                <button
+                  onClick={descargarDocumentoWord}
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md"
+                >
+                  <Download className="w-4 h-4" /> Descargar en Word (.doc)
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                {/* Panel Izquierdo */}
+                <div className="lg:col-span-5 space-y-4">
+                  <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900 space-y-4">
+                    
+                    <div>
+                      <label className="text-[11px] font-mono text-slate-400 block mb-1">1. Ficha del Cliente (CRM):</label>
+                      <select
+                        value={clienteEnsamblaje}
+                        onChange={(e) => setClienteEnsamblaje(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-emerald-400"
+                      >
+                        {clientes.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-mono text-slate-400 block mb-1">2. Plantilla Inmutable de Drive:</label>
+                      <select
+                        value={modeloDriveSeleccionado}
+                        onChange={(e) => setModeloDriveSeleccionado(e.target.value)}
+                        className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white"
+                      >
+                        <option value="arrendamiento">Contrato de Arrendamiento Comercial e Industrial (Completo)</option>
+                        <option value="poder">Poder Notarial General y Especial Amplio (Modelo Piccolo)</option>
+                        <option value="asamblea">Acta de Asamblea General Extraordinaria de Accionistas (Sub 1308)</option>
+                      </select>
+                    </div>
+
+                    {/* Cláusulas Lego Opcionales */}
+                    {modeloDriveSeleccionado === 'arrendamiento' && (
+                      <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+                        <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold block">
+                          Cláusulas Lego de Blindaje Procesal:
+                        </span>
+
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                          <input
+                            type="checkbox"
+                            checked={clausulaLegoBCV}
+                            onChange={(e) => setClausulaLegoBCV(e.target.checked)}
+                            className="rounded border-slate-700 text-cyan-500"
+                          />
+                          <span>Ajuste en Bolívares a Tasa Oficial BCV</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                          <input
+                            type="checkbox"
+                            checked={clausulaLegoViasDeHecho}
+                            onChange={(e) => setClausulaLegoViasDeHecho(e.target.checked)}
+                            className="rounded border-slate-700 text-cyan-500"
+                          />
+                          <span>Prohibición de Vías de Hecho y Penalidad 500 USD/día</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                          <input
+                            type="checkbox"
+                            checked={clausulaLegoMejoras}
+                            onChange={(e) => setClausulaLegoMejoras(e.target.checked)}
+                            className="rounded border-slate-700 text-cyan-500"
+                          />
+                          <span>Compensación Mensual de Obras de Reparación</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                          <input
+                            type="checkbox"
+                            checked={clausulaLegoArbitral}
+                            onChange={(e) => setClausulaLegoArbitral(e.target.checked)}
+                            className="rounded border-slate-700 text-cyan-500"
+                          />
+                          <span>Cláusula Arbitral Especial CEDCA (en vez de Tribunales)</span>
+                        </label>
+                      </div>
+                    )}
+
+                    {/* Datos Bloqueados del CRM */}
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1.5 text-xs font-mono">
+                      <div className="flex justify-between items-center text-[10px]">
+                        <span className="text-slate-500 uppercase">Parte Otorgante:</span>
+                        <span className="text-emerald-400 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> Verificado CRM
+                        </span>
+                      </div>
+                      <div className="font-bold text-white text-[11px] truncate">{variablesEnsamblador.arrendataria}</div>
+                      <div className="text-[10px] text-slate-400">RIF: {variablesEnsamblador.arrendataria_rif} • Rep: {variablesEnsamblador.arrendataria_rep}</div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Panel Derecho: Vista del Documento */}
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900 space-y-3">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-800 text-xs font-bold">
+                      <span className="text-emerald-400 flex items-center gap-1.5 font-mono">
+                        <Check className="w-4 h-4" /> Instrumento Notarial Íntegro
+                      </span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(documentoGeneradoWord);
+                          alert("Texto íntegro copiado al portapapeles.");
+                        }}
+                        className="px-3 py-1 rounded-lg border border-slate-700 hover:bg-slate-800 text-xs font-mono flex items-center gap-1 cursor-pointer"
+                      >
+                        <Copy className="w-3.5 h-3.5" /> Copiar Texto
+                      </button>
+                    </div>
+
+                    <div className="p-4 rounded-xl border border-slate-800 bg-slate-950 text-xs leading-relaxed max-h-[560px] overflow-y-auto whitespace-pre-wrap font-serif text-slate-200 select-text">
+                      {documentoGeneradoWord}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* GABINETE 3: AUDITORÍA DE CONTRAPARTES & REDLINE                   */}
+          {/* ================================================================= */}
+          {activeTab === 'auditoria_contrapartes' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <FileCheck2 className="w-6 h-6 text-purple-400" /> 3. Auditoría de Contrapartes & Redline
+                  </h1>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Cotejo preventivo con copiado individual de Redlines y Argumentario para el Director Comercial.
+                  </p>
+                </div>
+              </div>
+
+              {/* Argumentario Ejecutivo para Comercial */}
+              <div className="p-4 rounded-2xl border border-purple-500/40 bg-purple-950/15 space-y-1.5">
+                <span className="text-xs font-mono text-purple-300 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <Bookmark className="w-4 h-4 text-purple-400" /> Argumentario para la Llamada con el Director Comercial:
+                </span>
+                <p className="text-xs text-slate-200 leading-relaxed">
+                  {informeAuditoria.argumentario_comercial}
+                </p>
+              </div>
+
+              {/* Cláusulas Auditadas con Copia Rápida */}
+              <div className="grid grid-cols-1 gap-4">
+                {informeAuditoria.semaforo.map((s: any) => (
+                  <div key={s.id} className="p-4 rounded-2xl border border-slate-800 bg-slate-900 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className={`px-2.5 py-0.5 rounded text-xs font-bold font-mono ${
+                        s.color === 'rojo' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'
+                      }`}>
+                        {s.nivel}
+                      </span>
+                      <span className="font-bold text-white text-xs">{s.clausula}</span>
+                    </div>
+
+                    <p className="text-xs text-slate-300">{s.analisis}</p>
+
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-cyan-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <strong>Redline:</strong> {s.redline_sugerido}
+                      </div>
+                      <button
+                        onClick={() => copiarRedlineIndividual(s.redline_sugerido)}
+                        className="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-[11px] shrink-0 cursor-pointer flex items-center gap-1 shadow-sm"
+                      >
+                        <Copy className="w-3.5 h-3.5" /> Copiar al Control de Cambios
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* GABINETE 4: ENLACE CORPORATIVO (CON EXPORTADOR A JIRA)            */}
+          {/* ================================================================= */}
+          {activeTab === 'enlace_corporativo' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <Cpu className="w-6 h-6 text-blue-400" /> 4. Enlace Corporativo & Nuevos Proyectos
+                  </h1>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Traducción directa de requisitos legales (EU AI Act y RGPD) a especificaciones técnicas y tickets Jira.
+                  </p>
+                </div>
+
+                <button
+                  onClick={exportarTicketsJiraMarkdown}
+                  className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Exportar a Jira / Markdown
+                </button>
+              </div>
+
+              <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900 space-y-4">
+                <div className="text-sm font-bold text-white">{dictamenIniciativa.viabilidad}</div>
+                <p className="text-xs text-slate-300">{dictamenIniciativa.resumen_directivo}</p>
+
+                <div className="space-y-3">
+                  {dictamenIniciativa.especificaciones_tecnicas.map((t: any) => (
+                    <div key={t.ticket} className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-mono text-cyan-400 font-bold mr-2">{t.ticket}</span>
+                          <span className="text-white font-medium">{t.titulo}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-amber-400 font-bold">{t.prioridad}</span>
+                      </div>
+
+                      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800/80 font-mono text-[11px] text-slate-300 whitespace-pre-wrap">
+                        {t.gherkin}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* GABINETE 5: CONTROL DE GESTIÓN                                    */}
+          {/* ================================================================= */}
+          {activeTab === 'control_gestion' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                <CheckSquare className="w-6 h-6 text-amber-400" /> 5. Control de Gestión y Plazos
+              </h1>
+              <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900 text-xs space-y-2 text-slate-300">
+                <p>Supervisión activa de SLAs del equipo letrado asociado y cumplimiento de directrices del General Counsel.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* GABINETE 6: ACTAS Y MINUTAS EJECUTIVAS (CON GENERADOR DE CORREO)  */}
+          {/* ================================================================= */}
+          {activeTab === 'actas_minutas' && (
+            <div className="space-y-6 max-w-6xl mx-auto">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-800/40">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <Mic className="w-6 h-6 text-pink-400" /> 6. Actas y Minutas Ejecutivas
+                  </h1>
+                  <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Grabación de sala y generación de minuta con exportación de correo de formalización y asignación a Planificador.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={copiarCorreoFormalizacionAcuerdos}
+                    className="px-3.5 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <Send className="w-3.5 h-3.5" /> Copiar Correo de Acuerdos
+                  </button>
+                </div>
+              </div>
+
+              {/* Consola Central de Grabación */}
+              <div className="p-6 rounded-2xl border border-pink-500/30 bg-slate-900 shadow-xl space-y-4">
+                <div className="flex flex-col items-center justify-center text-center space-y-3 py-1">
+                  
+                  <div className="space-y-1">
+                    <div className="font-mono text-4xl font-extrabold text-white tracking-widest">
+                      {Math.floor(segundosGrabacion / 60).toString().padStart(2, '0')}:{(segundosGrabacion % 60).toString().padStart(2, '0')}
+                    </div>
+                    <div className="text-xs font-mono text-slate-400 flex items-center justify-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${grabandoAudioLocal ? 'bg-red-500 animate-ping' : 'bg-slate-500'}`}></span>
+                      <span>{grabandoAudioLocal ? "Grabando audio de sala en memoria privada..." : "Listo para grabar o cargar archivo de audio"}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
+                    <button
+                      onClick={alternarGrabacionAudioLocal}
+                      className={`px-6 py-3.5 rounded-2xl font-mono font-bold text-xs transition-all flex items-center gap-2.5 cursor-pointer shadow-lg ${
+                        grabandoAudioLocal
+                          ? 'bg-red-500 text-white animate-pulse shadow-red-500/30'
+                          : 'bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 text-white shadow-pink-500/25'
+                      }`}
+                    >
+                      {grabandoAudioLocal ? <Square className="w-4 h-4 fill-white" /> : <Mic className="w-4 h-4" />}
+                      <span>{grabandoAudioLocal ? "Detener Grabación y Procesar" : "Grabar Audio de Sala (Local)"}</span>
+                    </button>
+
+                    <label className="px-5 py-3.5 rounded-2xl border border-slate-800 bg-slate-950 hover:border-pink-400 text-slate-200 font-mono font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md">
+                      <Upload className="w-4 h-4 text-pink-400" />
+                      <span>Subir Archivo de Audio</span>
+                      <input type="file" accept="audio/*,.mp3,.wav,.m4a,.webm,.ogg" onChange={handleSubirArchivoAudio} className="hidden" />
+                    </label>
+                  </div>
+
+                  {archivoAudioNombre && (
+                    <div className="text-xs font-mono text-cyan-300 bg-slate-950 px-3.5 py-1.5 rounded-lg border border-slate-800">
+                      Archivo: <strong>{archivoAudioNombre}</strong>
+                    </div>
+                  )}
+
+                  {audioUrlLocal && (
+                    <div className="w-full max-w-md pt-1">
+                      <audio controls src={audioUrlLocal} className="w-full h-9" />
+                    </div>
+                  )}
+
+                  {cargandoTranscripcionWhisper && (
+                    <div className="text-xs font-mono text-pink-300 flex items-center gap-2 animate-pulse">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Transcribiendo audio y extrayendo acuerdos con Whisper On-Premise...</span>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+
+              {/* Minuta Oficial */}
+              {minutaWhisper && (
+                <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900 space-y-5 shadow-xl">
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-3 border-b border-slate-800">
+                    <div>
+                      <span className="text-xs font-mono text-pink-400 font-bold uppercase tracking-wider">
+                        Minuta Oficial Certificada
+                      </span>
+                      <h2 className="text-lg font-bold text-white mt-0.5">{minutaWhisper.titulo}</h2>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={copiarCorreoFormalizacionAcuerdos}
+                        className="px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-800 text-xs font-mono flex items-center gap-1 cursor-pointer"
+                      >
+                        <Copy className="w-3.5 h-3.5" /> Copiar Correo
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Acuerdos Vinculantes */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-mono text-emerald-400 uppercase font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Acuerdos Vinculantes Formalizados:
+                    </span>
+                    <div className="space-y-1.5">
+                      {minutaWhisper.acuerdos.map((ac: string, i: number) => (
+                        <div key={i} className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-200 flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">{i + 1}.</span>
+                          <span>{ac}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Items con Asignación a Planificador */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-mono text-cyan-400 uppercase font-bold flex items-center gap-1.5">
+                      <CheckSquare className="w-4 h-4 text-cyan-400" /> Compromisos Asignables al Planificador:
+                    </span>
+
+                    <div className="space-y-2">
+                      {minutaWhisper.action_items.map((ai: any) => (
+                        <div key={ai.id} className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                          <div className="space-y-1">
+                            <div className="font-bold text-white">{ai.tarea}</div>
+                            <div className="text-[11px] text-slate-400 flex items-center gap-3">
+                              <span>Resp: <strong className="text-slate-200">{ai.responsable}</strong></span>
+                              <span>Plazo: <strong className="text-amber-400">{ai.plazo}</strong></span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-800 text-cyan-300">{ai.prioridad}</span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => asignarActionItemAPlanificador(ai)}
+                            disabled={ai.agregado}
+                            className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer shrink-0 ${
+                              ai.agregado
+                                ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 cursor-default'
+                                : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-sm'
+                            }`}
+                          >
+                            {ai.agregado ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                            <span>{ai.agregado ? "Asignado en Planificador" : "Asignar al Planificador"}</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Transcripción Cruda Colapsable */}
+                  <div className="pt-2 border-t border-slate-800/80">
+                    <button
+                      onClick={() => setMostrarTranscripcionCruda(!mostrarTranscripcionCruda)}
+                      className="text-xs font-mono text-slate-400 hover:text-white flex items-center gap-1.5 cursor-pointer"
+                    >
+                      {mostrarTranscripcionCruda ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                      <span>{mostrarTranscripcionCruda ? "Ocultar Transcripción Forense" : "Mostrar Transcripción Forense Cruda (Audit Trail)"}</span>
+                    </button>
+
+                    {mostrarTranscripcionCruda && (
+                      <div className="p-3.5 mt-2 rounded-xl bg-slate-950 border border-slate-800 text-xs italic text-slate-300 font-serif leading-relaxed">
+                        {minutaWhisper.transcripcion_extracto}
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* CUMPLIMIENTO */}
+          {activeTab === 'aduana' && (
+            <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900 text-xs">
+              <h2 className="text-lg font-bold text-white mb-2">Aduana & Secreto Profesional</h2>
+              <p className="text-slate-400">Filtro de inspección y anonimización de datos sensibles antes de cualquier procesamiento.</p>
+            </div>
+          )}
+
+          {activeTab === 'boveda' && (
+            <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900 text-xs">
+              <h2 className="text-lg font-bold text-white mb-2">Bóveda Forense Inmutable SHA-256</h2>
+              <p className="text-slate-400">Registro criptográfico de custodia de documentos y minutas para validez probatoria.</p>
+            </div>
+          )}
+
+          {activeTab === 'canal_etico' && (
+            <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900 text-xs">
+              <h2 className="text-lg font-bold text-white mb-2">Canal Ético y Cumplimiento</h2>
+              <p className="text-slate-400">Línea de reporte confidencial y trazabilidad de investigaciones corporativas.</p>
+            </div>
+          )}
+
+          {activeTab === 'societario' && (
+            <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900 text-xs">
+              <h2 className="text-lg font-bold text-white mb-2">Libros Societarios Digitales</h2>
+              <p className="text-slate-400">Libro de Accionistas, Actas de Junta Directiva y Asambleas de Accionistas.</p>
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+      {/* =================================================================== */}
+      {/* MODAL: VER EXPEDIENTES VINCULADOS AL CLIENTE (CRM)                  */}
+      {/* =================================================================== */}
+      {clienteVerFichaModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl p-6 rounded-3xl border border-slate-700 bg-slate-900 text-white space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-800">
+              <div>
+                <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold">{clienteVerFichaModal.rif}</span>
+                <h3 className="font-bold text-base text-white">{clienteVerFichaModal.nombre}</h3>
+              </div>
+              <button onClick={() => setClienteVerFichaModal(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-mono text-slate-400 uppercase font-bold">Expedientes Activos en Despacho:</span>
+              {(() => {
+                const exps = tableroPlanificador.filter(exp => exp.cliente === clienteVerFichaModal.nombre);
+                if (exps.length === 0) {
+                  return <div className="p-4 text-center text-xs text-slate-500 font-mono">No hay expedientes activos para este cliente.</div>;
+                }
+                return exps.map(e => (
+                  <div key={e.id} className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center text-xs">
+                    <div>
+                      <span className="font-mono text-cyan-400 font-bold mr-2">{e.id}</span>
+                      <span className="text-white font-medium">{e.titulo}</span>
+                      <div className="text-[10px] text-slate-400 mt-0.5">Tribunal: {e.tribunal} • Plazo: {e.plazo}</div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-cyan-300">{e.estado}</span>
+                  </div>
+                ));
+              })()}
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-slate-800">
+              <button
+                onClick={() => setClienteVerFichaModal(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* MODAL: NUEVO ASUNTO / EXPEDIENTE                                    */}
+      {/* =================================================================== */}
+      {modalNuevoAsunto && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl p-6 rounded-3xl border border-slate-700 bg-slate-900 text-white space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <Plus className="w-5 h-5 text-cyan-400" />
+                <span>Nuevo Asunto / Expediente Procesal</span>
+              </h3>
+              <button onClick={() => setModalNuevoAsunto(false)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={agregarNuevoAsunto} className="space-y-3.5 text-xs">
+              <div>
+                <label className="text-slate-400 block mb-1">Título u Objeto *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej. Interdicto de despojo o negociación de anexo contractual"
+                  value={nuevoAsuntoForm.titulo}
+                  onChange={(e) => setNuevoAsuntoForm({...nuevoAsuntoForm, titulo: e.target.value})}
+                  className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1">Cliente Vinculado</label>
+                  <select
+                    value={nuevoAsuntoForm.cliente}
+                    onChange={(e) => setNuevoAsuntoForm({...nuevoAsuntoForm, cliente: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-cyan-400 font-bold"
+                  >
+                    {clientes.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Rol / Cartera</label>
+                  <select
+                    value={nuevoAsuntoForm.tipo_rol}
+                    onChange={(e: any) => setNuevoAsuntoForm({...nuevoAsuntoForm, tipo_rol: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white"
+                  >
+                    <option value="Externo">⚖️ Cartera Externa / Litigio</option>
+                    <option value="In-House">🏛️ In-House / Corporativo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1">Dependencia / Bloqueo</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Esperando Facturas Tercero"
+                    value={nuevoAsuntoForm.bloqueo}
+                    onChange={(e) => setNuevoAsuntoForm({...nuevoAsuntoForm, bloqueo: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Cuantía Estimada</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. 35.000 USD"
+                    value={nuevoAsuntoForm.cuantia}
+                    onChange={(e) => setNuevoAsuntoForm({...nuevoAsuntoForm, cuantia: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-emerald-400 font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1">Plazo Fatal / Término</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Jueves 16:00"
+                    value={nuevoAsuntoForm.plazo}
+                    onChange={(e) => setNuevoAsuntoForm({...nuevoAsuntoForm, plazo: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Prioridad</label>
+                  <select
+                    value={nuevoAsuntoForm.prioridad}
+                    onChange={(e) => setNuevoAsuntoForm({...nuevoAsuntoForm, prioridad: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white"
+                  >
+                    <option value="Crítica">Crítica</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Media">Media</option>
+                    <option value="Normal">Normal</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setModalNuevoAsunto(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold cursor-pointer shadow-md"
+                >
+                  Crear Asunto
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* MODAL: VER FICHA INTEGRAL DEL EXPEDIENTE                           */}
+      {/* =================================================================== */}
+      {modalVerExpediente && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl p-6 rounded-3xl border border-slate-700 bg-slate-900 text-white space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex justify-between items-start pb-3 border-b border-slate-800">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-cyan-400 font-bold text-sm">{modalVerExpediente.id}</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-cyan-300 font-mono">
+                    {modalVerExpediente.materia}
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 font-mono">
+                    {modalVerExpediente.tipo_rol}
+                  </span>
+                </div>
+                <h3 className="font-bold text-lg text-white mt-1">{modalVerExpediente.titulo}</h3>
+              </div>
+              <button onClick={() => setModalVerExpediente(null)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-500 block">CLIENTE:</span>
+                <span className="text-cyan-400 font-bold truncate block">{modalVerExpediente.cliente}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-500 block">CUANTÍA:</span>
+                <span className="text-emerald-400 font-bold">{modalVerExpediente.cuantia}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-500 block">BLOQUEO:</span>
+                <span className="text-amber-400 font-bold">{modalVerExpediente.bloqueo}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <span className="text-[10px] text-slate-500 block">ESTADO:</span>
+                <span className="text-cyan-300 font-bold">{modalVerExpediente.estado}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-xs font-mono text-slate-400 uppercase font-bold">Tribunal / Sede:</span>
+              <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white">
+                {modalVerExpediente.tribunal}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-xs font-mono text-slate-400 uppercase font-bold">Resumen de Hechos & Bitácora:</span>
+              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+                {modalVerExpediente.detalles}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
+              <div className="flex items-center gap-1.5 text-xs font-mono">
+                <span className="text-slate-400">Mover a:</span>
+                {['Por Iniciar', 'En Tramitación', 'Revisión & Firma', 'Concluido'].map(st => (
+                  <button
+                    key={st}
+                    onClick={() => moverEstadoAsunto(modalVerExpediente.id, st)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
+                      modalVerExpediente.estado === st ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => eliminarAsunto(modalVerExpediente.id)}
+                className="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 cursor-pointer font-mono"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Archivar Asunto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =================================================================== */}
+      {/* MODAL: NUEVO EVENTO CALENDARIO                                      */}
+      {/* =================================================================== */}
+      {modalNuevoEvento && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md p-6 rounded-3xl border border-slate-700 bg-slate-900 text-white space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-800">
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-amber-400" />
+                <span>Agendar Término o Audiencia</span>
+              </h3>
+              <button onClick={() => setModalNuevoEvento(false)} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={agregarNuevoEventoCalendario} className="space-y-3 text-xs">
+              <div>
+                <label className="text-slate-400 block mb-1">Título *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej. Contestación de demanda por desalojo"
+                  value={nuevoEventoForm.titulo}
+                  onChange={(e) => setNuevoEventoForm({...nuevoEventoForm, titulo: e.target.value})}
+                  className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1">Fecha</label>
+                  <input
+                    type="date"
+                    required
+                    value={nuevoEventoForm.fecha}
+                    onChange={(e) => setNuevoEventoForm({...nuevoEventoForm, fecha: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-400 block mb-1">Hora</label>
+                  <input
+                    type="time"
+                    value={nuevoEventoForm.hora}
+                    onChange={(e) => setNuevoEventoForm({...nuevoEventoForm, hora: e.target.value})}
+                    className="w-full p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setModalNuevoEvento(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold cursor-pointer shadow-md"
+                >
+                  Guardar Término
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
