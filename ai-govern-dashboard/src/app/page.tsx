@@ -518,7 +518,7 @@ const CHATS_INICIALES = [
 ];
 
 export default function DashboardLegalUniversal() {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const isDark = theme === 'dark';
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -1720,7 +1720,156 @@ Abogada Directora & General Counsel`;
   };
 
   return (
-    <div className={`min-h-screen flex ${isDark ? 'bg-[#090d16] text-slate-200' : 'bg-slate-50 text-slate-800'} font-sans overflow-hidden`}>
+    <div className={`editorial-root min-h-screen flex ${isDark ? 'theme-editorial-dark bg-[#090d16] text-slate-200' : 'theme-editorial-light bg-[#FAF8F5] text-[#0F172A]'} font-sans overflow-hidden`}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap');
+
+        .editorial-root {
+          font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+          font-size: clamp(0.875rem, 0.95vw, 1rem);
+        }
+        .editorial-root h1 {
+          font-family: 'Newsreader', Georgia, serif;
+          font-size: clamp(1.35rem, 2.2vw + 0.4rem, 2rem) !important;
+          line-height: 1.18 !important;
+          letter-spacing: -0.01em;
+        }
+        .editorial-root h2, .editorial-root h3 {
+          font-family: 'Newsreader', Georgia, serif;
+          letter-spacing: -0.01em;
+        }
+
+        /* MODO EDITORIAL CLARO (MARFIL #FAF8F5, AZUL OXFORD #0F172A, BRONCE #9A7B3E) */
+        .theme-editorial-light {
+          background-color: #FAF8F5 !important;
+          color: #0F172A !important;
+        }
+        .theme-editorial-light aside,
+        .theme-editorial-light header {
+          background-color: #F3EFE6 !important;
+          border-color: #E2D9C8 !important;
+          color: #0F172A !important;
+        }
+        .theme-editorial-light .bg-\[\#0d1322\],
+        .theme-editorial-light .bg-slate-900,
+        .theme-editorial-light .bg-slate-900\/90,
+        .theme-editorial-light .bg-slate-900\/60,
+        .theme-editorial-light .bg-\[\#121a2d\] {
+          background-color: #FFFFFF !important;
+          border-color: #E6DFD1 !important;
+          color: #0F172A !important;
+          box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.06);
+        }
+        .theme-editorial-light .bg-slate-950,
+        .theme-editorial-light .bg-slate-950\/60,
+        .theme-editorial-light .bg-slate-950\/70,
+        .theme-editorial-light .bg-slate-950\/40,
+        .theme-editorial-light .bg-slate-950\/30,
+        .theme-editorial-light .bg-slate-900\/50 {
+          background-color: #FAF8F5 !important;
+          border-color: #E2D9C8 !important;
+          color: #0F172A !important;
+        }
+        .theme-editorial-light .bg-slate-800,
+        .theme-editorial-light .bg-slate-800\/80,
+        .theme-editorial-light .bg-slate-800\/50 {
+          background-color: #F3EFE6 !important;
+          border-color: #D5CBB8 !important;
+          color: #0F172A !important;
+        }
+        .theme-editorial-light .border-slate-800,
+        .theme-editorial-light .border-slate-800\/60,
+        .theme-editorial-light .border-slate-800\/40,
+        .theme-editorial-light .border-slate-800\/80,
+        .theme-editorial-light .border-slate-700 {
+          border-color: #E2D9C8 !important;
+        }
+        .theme-editorial-light .divide-slate-800\/40 > :not([hidden]) ~ :not([hidden]),
+        .theme-editorial-light .divide-slate-800\/50 > :not([hidden]) ~ :not([hidden]) {
+          border-color: #E6DFD1 !important;
+        }
+        .theme-editorial-light .text-white,
+        .theme-editorial-light .text-slate-100,
+        .theme-editorial-light .text-slate-200 {
+          color: #0F172A !important;
+        }
+        .theme-editorial-light .text-slate-300,
+        .theme-editorial-light .text-slate-400 {
+          color: #475569 !important;
+        }
+        .theme-editorial-light .text-slate-500 {
+          color: #64748B !important;
+        }
+        /* Transformar acentos neón cyan a Bronce Editorial (#8C6D32) y Azul Oxford (#0F172A) */
+        .theme-editorial-light .text-cyan-400,
+        .theme-editorial-light .text-cyan-300,
+        .theme-editorial-light .text-cyan-200\/70 {
+          color: #8C6D32 !important;
+        }
+        .theme-editorial-light .text-emerald-400,
+        .theme-editorial-light .text-emerald-300 {
+          color: #047857 !important;
+        }
+        .theme-editorial-light .text-purple-400,
+        .theme-editorial-light .text-purple-300,
+        .theme-editorial-light .text-pink-400,
+        .theme-editorial-light .text-pink-300 {
+          color: #1E293B !important;
+        }
+        .theme-editorial-light .text-amber-400 {
+          color: #B45309 !important;
+        }
+        .theme-editorial-light .bg-cyan-500\/15,
+        .theme-editorial-light .bg-cyan-500\/20,
+        .theme-editorial-light .bg-cyan-950\/20,
+        .theme-editorial-light .bg-cyan-900\/40 {
+          background-color: #F5EFE0 !important;
+          border-color: #C8B282 !important;
+          color: #0F172A !important;
+        }
+        .theme-editorial-light .bg-emerald-950\/60,
+        .theme-editorial-light .bg-emerald-950\/40,
+        .theme-editorial-light .bg-emerald-950\/20,
+        .theme-editorial-light .bg-emerald-500\/20,
+        .theme-editorial-light .bg-emerald-500\/15 {
+          background-color: #ECFDF5 !important;
+          border-color: #6EE7B7 !important;
+          color: #065F46 !important;
+        }
+        /* Botones Principales en Azul Marino Oxford (#0F172A) con texto blanco */
+        .theme-editorial-light .bg-gradient-to-r.from-cyan-500.to-blue-600,
+        .theme-editorial-light .bg-gradient-to-r.from-emerald-500.to-teal-600,
+        .theme-editorial-light .bg-gradient-to-r.from-pink-500.to-rose-600,
+        .theme-editorial-light .bg-cyan-600,
+        .theme-editorial-light .bg-cyan-500 {
+          background-image: none !important;
+          background-color: #0F172A !important;
+          color: #FAF8F5 !important;
+          border: 1px solid #0F172A !important;
+        }
+        .theme-editorial-light .bg-gradient-to-r.from-cyan-900\/40.to-blue-900\/40 {
+          background-image: none !important;
+          background-color: #F3EFE6 !important;
+          border-color: #D5CBB8 !important;
+        }
+        .theme-editorial-light input,
+        .theme-editorial-light select,
+        .theme-editorial-light textarea {
+          background-color: #FCFBF9 !important;
+          border-color: #D5CBB8 !important;
+          color: #0F172A !important;
+        }
+        .theme-editorial-light input:focus,
+        .theme-editorial-light select:focus,
+        .theme-editorial-light textarea:focus {
+          border-color: #0F172A !important;
+        }
+        /* Barra inferior móvil en modo editorial */
+        .theme-editorial-light .bg-\[\#090d16\]\/95 {
+          background-color: rgba(250, 248, 245, 0.96) !important;
+          border-color: #E2D9C8 !important;
+        }
+      `}</style>
       {/* =============================================================== */}
       {/* 1. BARRA LATERAL (DESKTOP)                                      */}
       {/* =============================================================== */}
@@ -1728,8 +1877,8 @@ Abogada Directora & General Counsel`;
         <aside className={`hidden md:flex flex-col w-72 h-screen border-r transition-all duration-300 ${isDark ? 'bg-[#0d1322] border-slate-800' : 'bg-white border-slate-200'} flex-shrink-0 z-20`}>
           <div className="p-5 flex items-center justify-between border-b border-slate-800/60">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                <Shield className="w-5 h-5 text-slate-950" />
+              <div className="w-9 h-9 rounded-lg bg-[#0F172A] text-[#FAF8F5] border border-[#9A7B3E]/50 flex items-center justify-center font-serif font-bold text-sm shadow-sm">
+                AG
               </div>
               <div>
                 <h1 className="font-bold text-sm tracking-wide text-white flex items-center gap-1.5">
